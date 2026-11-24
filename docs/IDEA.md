@@ -35,6 +35,10 @@ A product design portfolio built like a video editor's timeline.
 11. **The reel becomes the case study:** the playing film settles into the case study's hero, and the page continues below. No cut.
 12. **Zoom into the timeline:** the timeline zooms into the clip, which opens into its sections.
 
+**Motion**
+- **Butter-smooth, everywhere.** The bar is the feel of the intro scene in the `medicalhelp/the-archive` repo (feel, not a copy), which is inspired by Aristide Benoist's work: continuous, weighted, nothing snaps.
+- **A motion design review is part of every round** (a senior motion designer's lens: continuity, easing, timing, interruptibility, frame rate), as in the assistant explorations.
+
 **Scope and next step**
 13. **Desktop first;** mobile later.
 14. **No films yet.** For the explorations, use recordings of real work as stand-ins (the collection prototype, the assistant explorations).
