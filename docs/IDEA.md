@@ -52,6 +52,8 @@ A product design portfolio built like a video editor's timeline.
 20. **Personal projects:** the recipe app and the collection, unnamed on the timeline (hover names them), placed by date (both 2026, so after the companies). The collection clip shows several assistant explorations full screen, one after another.
 21. **Logos:** IKEA, Telekom and Red Bull from Wikimedia Commons, converted to white SVGs (`docs/design/portfolio/media/logos-*.svg`).
 
+22. **Minimal timeline:** no time indicators at all, neither a ruler on the timeline nor a timecode at the playhead; the playhead is a single thin line with no handle. Everything focuses on the work.
+
 ## Open
 - Roles and years per company.
 - What a clip's length means (duration, equal, importance): decide once the reel is cut.

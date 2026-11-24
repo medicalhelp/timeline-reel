@@ -14,7 +14,7 @@ A product design portfolio has to make sense to a hiring manager in about 30 sec
 ## 3. Decisions (from the grill)
 - **Audience:** hiring managers; clear in 30 seconds.
 - **Reel:** a 5–15 s film per project, autoplay; dragging the playhead or clicking a clip takes over. Muted, one sound toggle.
-- **Timeline:** ordered by time; at the bottom on Home, at the top in a case study, where its clips are the case study's sections and the playhead follows the scroll. About 20 clips. Work clips show the company logo in white; personal projects are quieter, with a tag. A hint of an editor (clips, playhead, timecode), no fake toolbars.
+- **Timeline:** ordered by time; at the bottom on Home, at the top in a case study, where its clips are the case study's sections and the playhead follows the scroll. About 20 clips. Work clips show the company logo in white; personal projects are quieter, with a tag. Minimal: clips and a playhead that is a single thin line; no ruler, no timecode, no handle (decided after H1).
 - **First screen also:** name and role; a caption for the current clip (company, project, role, year); contact and CV.
 - **Opening a case study, explore both:** the reel becomes the case study's hero, or the timeline zooms into the clip and opens it into sections.
 - **Desktop first** (1440 × 900 frame); mobile later.

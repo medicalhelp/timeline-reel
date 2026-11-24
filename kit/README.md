@@ -14,7 +14,7 @@ Pf.define({
     title: 'short name of the idea',
     does: 'what it does, in a few words',
     why: 'what it is good at · what it costs',
-    opts: { autoplay: true, ruler: 'timecode' },   // ruler: 'timecode' | 'years' | 'none'
+    opts: { autoplay: true },                      // the timeline has no ruler or timecode (decided)
     setup(ctx) {},        // change or add to the live page (restyle the timeline, add a case study layer…)
     async play(ctx) {}    // the scripted demo the board's "replay" runs
   }

@@ -53,7 +53,7 @@
 
   /* ── the engine: reel + timeline + caption on one master clock ─────────── */
   function makeEngine(root, def) {
-    const o = Object.assign({ autoplay: true, ruler: 'timecode' }, def.opts || {});
+    const o = Object.assign({ autoplay: true, ruler: 'none' }, def.opts || {});
     root.innerHTML = `
       <section class="reel" id="reel" aria-label="reel">${[0, 1].map(k => `<video muted playsinline preload="auto" data-layer="${k}"></video>`).join('')}</section>
       <header class="chrome"><div class="me"><b>Johannes Zimmer</b><span>product designer</span></div>
@@ -64,7 +64,7 @@
         <div class="tl-ruler" id="ruler"></div>
         <div class="tl-track" id="track">
           ${PROJECTS.map(p => `<button class="clip ${p.kind}" data-i="${p.i}" aria-label="${esc(p.kind === 'personal' ? p.name + ', personal project' : p.co + ', ' + p.yr)}"><span class="strip" aria-hidden="true"></span>${p.kind === 'work' ? `<img class="logo" src="${BASE}media/logos-${p.logo}.svg" alt="" style="height:${LOGO[p.logo].h}px">` : ''}</button>`).join('')}
-          <div class="tip" id="tip" aria-hidden="true"></div><div class="head" id="head"><span class="tc" id="tcode">00:00:00</span></div>
+          <div class="tip" id="tip" aria-hidden="true"></div><div class="head" id="head"></div>
         </div>
       </section>`;
     const $ = s => root.querySelector(s), $$ = s => [...root.querySelectorAll(s)];
@@ -93,7 +93,7 @@
       if (o.ruler === 'years') PROJECTS.forEach((p, i) => { if (!i || p.yr.slice(0, 4) !== PROJECTS[i - 1].yr.slice(0, 4)) r.insertAdjacentHTML('beforeend', `<span style="left:${xOf(p.start)}px;transform:none">${p.yr.slice(0, 4)}</span>`); });
       S.headX = xOf(S.t); place();
     }
-    const place = () => { head.style.transform = `translateX(${S.headX}px)`; $('#tcode').textContent = tc(S.t); };
+    const place = () => { head.style.transform = `translateX(${S.headX}px)`; };
     const clipAt = t => { for (let i = PROJECTS.length - 1; i >= 0; i--) if (t >= PROJECTS[i].start - 1e-6) return i; return 0; };
     const ms = d => d / SPEED;
     const anim = (el, kf, d, ease, extra = {}) => el.animate(kf, Object.assign({ duration: ms(d), easing: CSS[ease] || ease, fill: 'both' }, extra));
