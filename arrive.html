@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>arrive</title>
+<link rel="stylesheet" href="kit/pf.css">
+<style>
+/* I1 · first load: every value below is written each frame from one timeline, T (seconds) */
+.i1 .me b,.i1 .me span,.i1 .nav,.i1 .snd,.i1 .cap,.i1 .head,.i1 .clip .logo{will-change:transform,opacity}
+.i1 .clip .logo{transition:none}
+</style>
+</head>
+<body>
+<script src="kit/pf.js"></script>
+<script>
+/* ──────────────────────────────────────────────────────────────────────────
+   I1 · first load as one continuous gesture
+
+   The stage is black. The name fades up alone in the middle, small, then settles into its corner;
+   while it travels the timeline draws in from left to right and each logo lights as the edge passes
+   it; the first film fades up behind with a slow camera settle, and the playhead appears already
+   moving, the clock easing up to real time. Nothing waits for anything else to finish.
+   Timing at 1× (one timeline T, on the master clock; every leg overlaps the last):
+     0.05–0.60   name fades up in the centre, rising 8 px (expo-out).
+     0.55–1.95   name travels to its corner (master curve .601,0,.405,1, transform only; it never scales).
+     1.00–2.30   timeline draws in: one clip-path wipe on the track, left → right (master curve);
+                 each logo fades in over ≈ 120 px of the wipe's edge.
+     1.45–2.05   role line under the name (expo-out, 6 px rise).
+     1.60–2.80   first film fades up (master curve); the reel settles from scale 1.06 → 1 over
+                 1.6–3.6 s (expo-out, log space).
+     1.60–2.60   the clock eases from 0 to real time (rate on the master curve; the film's
+                 playbackRate follows), so the playhead starts moving without a jolt.
+     2.15–2.50   playhead line fades in, already moving.
+     2.45        caption arrives (the kit's 900 ms expo-out, staggered lines).
+     2.40–3.00   contact links; 2.80–3.30 sound toggle.  Settled by ≈ 3.6 s; then the reel plays on.
+   Scripted demo (board "replay"): the same arrival from black.
+   Reduced motion: everything crossfades in over 400 ms, nothing moves; no autoplay.
+   ────────────────────────────────────────────────────────────────────────── */
+Pf.define({
+  I1: {
+    title: 'first load as one gesture',
+    does: 'name settles · clips draw in · film fades up · playhead starts',
+    why: 'The first three seconds teach the whole layout in the order you read it: who, the career, the work · it delays the first film by ≈ 1.6 s, and it must be skippable on return visits.',
+    opts: { autoplay: false },
+    setup(ctx) {
+      const { root, S, EASE } = ctx;
+      root.classList.add('i1');
+      const name = ctx.$('.me b'), role = ctx.$('.me span'), nav = ctx.$('.nav'), snd = ctx.$('#snd'), cap = ctx.$('#cap'), reel = ctx.$('#reel'), track = ctx.track, head = ctx.head;
+      const logos = ctx.$$('.clip .logo');
+      const seg = (T, a, b, e = EASE.soft) => e(Math.min(1, Math.max(0, (T - a) / (b - a))));
+      const r = name.getBoundingClientRect(), dx = innerWidth / 2 - (r.left + r.width / 2), dy = innerHeight / 2 - (r.top + r.height / 2);
+      const centers = logos.map(l => { const c = l.parentElement; return c.offsetLeft + c.offsetWidth / 2; });
+      let T = 0, last = performance.now(), capDone = false, started = false, rate = -1;
+
+      function draw() {
+        const W = track.clientWidth;
+        if (ctx.reduced) {
+          const o = seg(T, 0, .4).toFixed(3);
+          [name, role, nav, snd, cap, reel, head].forEach(el => el.style.opacity = o); logos.forEach(l => l.style.opacity = o);
+          track.style.opacity = o;
+          if (!capDone && T > 0) { capDone = true; delete cap.dataset.i; ctx.caption(0); }
+          return;
+        }
+        name.style.opacity = seg(T, .05, .6).toFixed(3);
+        const m = seg(T, .55, 1.95), rise = 8 * (1 - seg(T, .05, .6, EASE.arrive));
+        name.style.transform = `translate(${(dx * (1 - m)).toFixed(2)}px,${(dy * (1 - m) + rise).toFixed(2)}px)`;
+        const ro = seg(T, 1.45, 2.05, EASE.arrive);
+        role.style.opacity = ro.toFixed(3); role.style.transform = `translateY(${(6 * (1 - ro)).toFixed(2)}px)`;
+        const front = W * seg(T, 1.0, 2.3);
+        track.style.clipPath = T >= 2.3 ? 'none' : `inset(-14px ${(W - front).toFixed(1)}px -14px 0)`;
+        logos.forEach((l, k) => { l.style.opacity = (.92 * EASE.arrive(Math.min(1, Math.max(0, (front - centers[k] + 30) / 120)))).toFixed(3); });
+        reel.style.opacity = seg(T, 1.6, 2.8).toFixed(3);
+        const s = Math.exp(Math.log(1.06) * (1 - seg(T, 1.6, 3.6, EASE.arrive)));
+        reel.style.transform = s > 1.0001 ? `scale(${s.toFixed(5)})` : 'none';
+        head.style.opacity = seg(T, 2.15, 2.5).toFixed(3);
+        nav.style.opacity = seg(T, 2.4, 3.0).toFixed(3);
+        snd.style.opacity = seg(T, 2.8, 3.3).toFixed(3);
+        if (!capDone && T >= 2.45) { capDone = true; cap.style.opacity = 1; delete cap.dataset.i; ctx.caption(0); }
+        // the clock eases up to real time; the film's playbackRate follows it
+        if (T >= 1.6) {
+          const k = seg(T, 1.6, 2.6);
+          if (!started) { started = true; S.rate = 0; ctx.play(); }
+          S.rate = k;
+          const pr = Math.max(.0625, k) * ctx.speed;
+          if (Math.abs(pr - rate) > .03 || (k >= 1 && rate !== ctx.speed)) { rate = k >= 1 ? ctx.speed : pr; ctx.vids.forEach(v => v.playbackRate = rate); }
+        }
+      }
+      cap.style.opacity = 0;
+      draw();                                          // first paint is already the start state
+      ctx.on('tick', () => {
+        const now = performance.now(); T += Math.min(.064, (now - last) / 1000) * ctx.speed; last = now;
+        if (T < 4.2) draw();
+      });
+    },
+    async play(ctx) { await ctx.wait(3800); }
+  }
+});
+</script>
+</body>
+</html>

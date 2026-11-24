@@ -69,8 +69,9 @@
       </section>`;
     const $ = s => root.querySelector(s), $$ = s => [...root.querySelectorAll(s)];
     const vids = $$('.reel video'), track = $('#track'), head = $('#head'), cap = $('#cap'), clips = $$('.clip');
-    const S = { t: 0, playing: false, cur: -1, layer: 0, headX: 0, glide: null, raf: 0, last: performance.now(), listeners: {} };
-    const emit = (n, d) => (S.listeners[n] || []).forEach(f => f(d));
+    const S = { t: 0, playing: false, cur: -1, layer: 0, headX: 0, glide: null, raf: 0, last: performance.now(), listeners: {}, showTok: 0,
+      rate: 1, range: null, holdCap: false };   // hooks (round 2): clock rate, loop range [a,b] in reel seconds, hold the caption
+    const emit = (n, d, x) => (S.listeners[n] || []).forEach(f => f(d, x));
 
     // layout: clip positions ∝ reel length
     let W = 1;
@@ -100,7 +101,7 @@
 
     // reel: two layers, crossfade with a slow settle (no black frame: the next film is playing before it fades up)
     async function show(i, at = 0, opts2 = {}) {
-      const p = PROJECTS[i], k = segAt(p, at), g = p.segs[k], inc = vids[1 - S.layer], out = vids[S.layer];
+      const p = PROJECTS[i], k = segAt(p, at), g = p.segs[k], inc = vids[1 - S.layer], out = vids[S.layer], tok = ++S.showTok;
       S.seg = k;
       const want = film(g.film);
       if (!inc.src.endsWith(want.split('/').pop()) || !inc.src) inc.src = want;
@@ -108,6 +109,7 @@
       try { inc.currentTime = g.from + (at - g.start); } catch (e) {}
       inc.play().catch(() => {});
       await new Promise(r => { if (inc.readyState >= 2) r(); else { inc.addEventListener('loadeddata', r, { once: true }); setTimeout(r, 900); } });
+      if (tok !== S.showTok) return;                 // a newer show() took over this layer (hook for fast seeks; H1 never overlaps)
       S.layer = 1 - S.layer;
       inc.classList.add('on'); out.classList.remove('on');
       const fade = reduced() ? 300 : (opts2.fade ?? 1000);
@@ -127,7 +129,7 @@
     function setCur(i, at = 0, o2) {
       if (i === S.cur && !o2?.force) return;
       S.cur = i; clips.forEach((c, k) => c.classList.toggle('on', k === i));
-      show(i, at, o2); caption(i); emit('clip', i);
+      show(i, at, o2); if (!S.holdCap) caption(i); emit('clip', i);
     }
 
     // jump: the playhead glides to the clip on the master curve while the reel crossfades
@@ -137,17 +139,65 @@
       S.t = p.start; setCur(i, 0, { force: true });
     }
 
+    // seek (hook for scrubbing): put the reel at reel-time t, the film at that frame; cuts crossfade briefly
+    function seek(t, o2 = {}) {
+      t = Math.max(0, Math.min(TOTAL - 1e-3, t)); S.t = t; S.glide = o2.glide ? S.glide : null;
+      const i = clipAt(t), local = t - PROJECTS[i].start, k = segAt(PROJECTS[i], local), f = { fade: o2.fade ?? 320, settle: o2.settle ?? 1 };
+      if (i !== S.cur) setCur(i, local, f);
+      else if (k !== S.seg) show(i, local, f);
+      else { const v = vids[S.layer], g = PROJECTS[i].segs[k], want = g.from + local - g.start;
+        if (v.readyState >= 1 && v.src.endsWith('/' + g.film + '.' + EXT) && !v.seeking && Math.abs(v.currentTime - want) > .02) { try { v.currentTime = want; } catch (e) {} } }
+    }
+
+    // a demo pointer (hook): a small dot the scripted demos move on the master clock; it dispatches real
+    // pointer/mouse events, so the page's own handlers run, and sets .hov on .clip / [data-hover] (synthetic events don't trigger :hover)
+    const P = { el: null, x: 0, y: 0, tw: null, down: false, over: null };
+    function pfire(type, ctor = PointerEvent) {
+      const el = document.elementFromPoint(P.x, P.y) || document.body;
+      el.dispatchEvent(new ctor(type, { bubbles: true, cancelable: true, composed: true, clientX: P.x, clientY: P.y, pointerId: 7, pointerType: 'mouse', isPrimary: true, button: /down|up|click/.test(type) ? 0 : -1, buttons: P.down ? 1 : 0 }));
+      return el;
+    }
+    function phover() {
+      const el = document.elementFromPoint(P.x, P.y), h = el && el.closest('.clip, [data-hover]');
+      if (h === P.over) return;
+      if (P.over) { P.over.classList.remove('hov'); P.over.dispatchEvent(new MouseEvent('mouseleave', { clientX: P.x, clientY: P.y })); P.over.dispatchEvent(new PointerEvent('pointerleave', { clientX: P.x, clientY: P.y, pointerId: 7 })); }
+      P.over = h;
+      if (h) { h.classList.add('hov'); h.dispatchEvent(new MouseEvent('mouseenter', { clientX: P.x, clientY: P.y })); h.dispatchEvent(new PointerEvent('pointerenter', { clientX: P.x, clientY: P.y, pointerId: 7 })); }
+    }
+    function pmove() { if (P.el) P.el.style.transform = `translate(${P.x}px,${P.y}px)`; pfire('pointermove'); pfire('mousemove', MouseEvent); phover(); }
+    function pointerTick(now) {
+      const w = P.tw; if (!w) return;
+      const k = Math.min(1, (now - w.t0) / (w.d / SPEED)), e = (typeof w.ease === 'function' ? w.ease : EASE[w.ease] || EASE.soft)(k);
+      P.x = w.x0 + (w.x1 - w.x0) * e; P.y = w.y0 + (w.y1 - w.y0) * e + Math.sin(Math.PI * e) * (w.arc || 0);
+      pmove(); if (k >= 1) { P.tw = null; w.done(); }
+    }
+    const pointer = {
+      get x() { return P.x; }, get y() { return P.y; },
+      show(x, y) {
+        if (!P.el) { P.el = document.createElement('div'); P.el.className = 'pf-cursor'; P.el.innerHTML = '<i></i>'; root.appendChild(P.el); }
+        P.x = x; P.y = y; P.el.style.transform = `translate(${x}px,${y}px)`;
+        anim(P.el.firstChild, [{ opacity: 0, transform: 'scale(.6)' }, { opacity: 1, transform: 'scale(1)' }], 320, 'arrive'); pmove();
+      },
+      to(x, y, d = 900, ease = 'soft', arc = 0) { return new Promise(r => { P.tw = { x0: P.x, y0: P.y, x1: x, y1: y, d, ease, arc, t0: performance.now(), done: r }; }); },
+      down() { P.down = true; pfire('pointerdown'); pfire('mousedown', MouseEvent); if (P.el) anim(P.el.firstChild, [{ transform: 'scale(1)' }, { transform: 'scale(.72)' }], 160, 'arrive'); },
+      up(click = true) { P.down = false; const el = pfire('pointerup'); pfire('mouseup', MouseEvent); if (click) el.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, clientX: P.x, clientY: P.y })); if (P.el) anim(P.el.firstChild, [{ transform: 'scale(.72)' }, { transform: 'scale(1)' }], 260, 'arrive'); },
+      wheel(dy) { const el = document.elementFromPoint(P.x, P.y) || document.body; el.dispatchEvent(new WheelEvent('wheel', { bubbles: true, cancelable: true, clientX: P.x, clientY: P.y, deltaY: dy, deltaMode: 0 })); },
+      hide() { if (P.over) { P.over.classList.remove('hov'); P.over.dispatchEvent(new MouseEvent('mouseleave')); P.over = null; } if (P.el) anim(P.el.firstChild, [{ opacity: 1 }, { opacity: 0 }], 360, 'soft'); }
+    };
+
     function frame(now) {
       const dt = Math.min(64, now - S.last) / 1000 * SPEED; S.last = now;
+      emit('tick', S, now);                          // hook: input-driven state, before the engine positions anything
       if (S.playing) {
-        S.t += dt;
+        S.t += dt * S.rate;
+        if (S.range && S.t >= S.range[1]) { S.t = S.range[0]; show(S.cur, S.t - PROJECTS[S.cur].start, { fade: 900 }); }
         if (S.t >= TOTAL) { S.t = 0; setCur(0, 0, { force: true }); S.glide = { from: S.headX, to: 0, t0: now, d: 1400 }; }
         const i = clipAt(S.t), local = S.t - PROJECTS[i].start;
         if (i !== S.cur) setCur(i, local);
         else if (segAt(PROJECTS[i], local) !== S.seg) show(i, local, { fade: 900 });   // a cut inside the clip: the caption stays
         // keep the film in step with the clock (correct only real drift, never every frame)
         const v = vids[S.layer], p = PROJECTS[S.cur], g = p.segs[S.seg || 0], want = g.from + (S.t - p.start - g.start);
-        if (v.readyState >= 2 && Math.abs(v.currentTime - want) > .35 && !v.seeking) { try { v.currentTime = want; } catch (e) {} }
+        if (v.readyState >= 2 && v.src.endsWith('/' + g.film + '.' + EXT) && Math.abs(v.currentTime - want) > .35 && !v.seeking) { try { v.currentTime = want; } catch (e) {} }   // only the layer that holds this film (fix: during a cut it re-seeked the old film)
       }
       if (S.glide) {
         const g = S.glide, k = Math.min(1, (now - g.t0) / (g.d / SPEED));
@@ -155,7 +205,7 @@
         g.to = xOf(S.t) + (S.playing ? 0 : 0);       // keep chasing the clock while it plays
         if (k >= 1) S.glide = null;
       } else if (!S.drag) S.headX = xOf(S.t);
-      place(); emit('frame', S);
+      place(); pointerTick(now); emit('frame', S);
       S.raf = requestAnimationFrame(frame);
     }
 
@@ -179,13 +229,14 @@
     const ro = new ResizeObserver(layout); ro.observe(track);
 
     const api = {
-      root, $, $$, S, PROJECTS, TOTAL, EASE, CSS, xOf, clipAt, jump, show, caption, setCur, layout, anim, ms, vids, track, head, clips,
+      root, $, $$, S, PROJECTS, TOTAL, EASE, CSS, xOf, clipAt, jump, show, caption, setCur, layout, anim, ms, vids, track, head, clips, seek, pointer,
+      listen(t, n, f, o) { t.addEventListener(n, f, o); (S.listeners.destroy = S.listeners.destroy || []).push(() => t.removeEventListener(n, f, o)); },
       get W() { return W; },
       play() { S.playing = true; S.last = performance.now(); vids[S.layer].play().catch(() => {}); emit('play'); },
       pause() { S.playing = false; vids.forEach(v => v.pause()); emit('pause'); },
       on(n, f) { (S.listeners[n] = S.listeners[n] || []).push(f); },
       setSpeed(s) { vids.forEach(v => v.playbackRate = s); },
-      destroy() { cancelAnimationFrame(S.raf); ro.disconnect(); document.removeEventListener('keydown', onKey); vids.forEach(v => { v.pause(); v.removeAttribute('src'); v.load(); }); }
+      destroy() { emit('destroy'); cancelAnimationFrame(S.raf); ro.disconnect(); document.removeEventListener('keydown', onKey); vids.forEach(v => { v.pause(); v.removeAttribute('src'); v.load(); }); }
     };
     layout(); setCur(0, 0, { force: true, fade: 1 });
     S.raf = requestAnimationFrame(frame);

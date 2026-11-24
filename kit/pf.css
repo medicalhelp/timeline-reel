@@ -77,3 +77,10 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 .pf-hint{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:20;padding:8px 14px;border-radius:16px;background:rgba(0,0,0,.6);color:#fff;font-size:12px;pointer-events:none;opacity:0;transition:opacity 300ms}
 .pf-hint.show{opacity:1}
 @media (prefers-reduced-motion:reduce){ .clip,.clip .logo{transition:none} }
+
+/* round 2 hooks: the demo pointer, and .hov mirrors :hover for its synthetic events */
+.pf-cursor{position:absolute;left:0;top:0;z-index:50;pointer-events:none;will-change:transform}
+.pf-cursor i{position:absolute;left:-7px;top:-7px;width:14px;height:14px;border-radius:50%;background:rgba(244,242,238,.9);box-shadow:0 0 0 1px rgba(10,10,11,.35),0 2px 10px rgba(0,0,0,.4);opacity:0}
+.clip.hov .strip{filter:brightness(.5) saturate(.95)}
+.clip.hov .logo{opacity:1}
+.clip.personal.hov .strip{filter:brightness(.42) saturate(.9)}

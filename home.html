@@ -5,6 +5,27 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>home</title>
 <link rel="stylesheet" href="kit/pf.css">
+<style>
+/* H2 · frames on approach: the strips follow --near (0 at rest, 1 when the pointer is at the timeline) */
+.h2 .clip .strip{opacity:var(--near,0)}
+.h2 .clip{box-shadow:inset 0 0 0 1px var(--line)}
+.h2 .clip.on{box-shadow:inset 0 0 0 1px rgba(244,242,238,.32)}
+/* H3 · the timeline breathes: one variable, --g (0 → 1), drives the reel, the timeline and the caption;
+   --b drives the frames' brightness (in reduced motion only --b moves) */
+.h3{--g:0;--b:0}
+.h3 .reel{transform:translateY(calc(var(--g) * -27px));clip-path:inset(calc(var(--g) * 27px) 0 calc(var(--g) * 27px) 0)}
+.h3 .cap,.h3 .snd{transform:translateY(calc(var(--g) * -54px))}
+.h3 .tl{height:144px;background:none}
+.h3 .tl::before{content:"";position:absolute;inset:0;background:var(--stage);transform:translateY(calc((1 - var(--g)) * 54px))}
+.h3 .tl-track{height:84px;transform:translateY(calc((1 - var(--g)) * 27px))}
+.h3 .clip{clip-path:inset(calc((1 - var(--g)) * 18px) 0 round 4px)}
+.h3 .clip .strip,.h3 .clip:hover .strip,.h3 .clip.hov .strip,.h3 .clip.on .strip{filter:brightness(.52) saturate(.9)}
+.h3 .clip .strip::after{content:"";position:absolute;inset:0;background:#000;opacity:calc(.2 + .25 * (1 - var(--b)))}
+.h3 .clip:hover .strip::after,.h3 .clip.hov .strip::after,.h3 .clip.on .strip::after{opacity:calc(.25 * (1 - var(--b)))}
+.h3 .clip.personal .strip::after{opacity:calc(.32 + .2 * (1 - var(--b)))}
+.h3 .head{scale:1 calc(1 - (1 - var(--g)) * .375)}
+.h3 .tip{translate:0 calc((1 - var(--g)) * 18px)}
+</style>
 </head>
 <body>
 <script src="kit/pf.js"></script>
@@ -37,6 +58,122 @@ Pf.define({
     async play(ctx) {
       await ctx.wait(4200);
       for (const i of [1, 2, 4]) { ctx.jump(i); await ctx.wait(3600); }
+    }
+  },
+
+  /* ────────────────────────────────────────────────────────────────────────
+     H2 · frames on approach
+
+     At rest the timeline is only the white logos on black (and the playhead): the work above has
+     the stage to itself. As the pointer comes down towards the timeline the frame strips fade up
+     underneath the logos; moving away lets them sink back.
+     Timing at 1×:
+       nearness     0 when the pointer is 240 px or more above the timeline, 1 from 40 px above it
+                    and inside (smoothstep between), 0 when it leaves the window.
+       strips       opacity follows nearness through a time-corrected damp: λ = 10/s rising
+                    (≈ 300 ms to 95 %), λ = 4/s falling (≈ 750 ms, a slower soft landing).
+                    One custom property (--near) on the timeline drives all five strips.
+       logos, playhead, hover label and clicks as in H1.
+     Scripted demo: a pointer dot drifts down from the reel (the frames rise as it nears), rests on
+     Telekom, glides to Red Bull and the collection, then leaves upwards; the frames sink back.
+     Reduced motion: nearness is on/off (within 140 px) with a ≈ 250 ms opacity fade; no autoplay.
+     ──────────────────────────────────────────────────────────────────────── */
+  H2: {
+    title: 'frames on approach',
+    does: 'logos at rest · frames rise as the pointer nears',
+    why: 'The reel owns the screen until you reach for the timeline, then the index tells you more · the frames are hidden from someone who never moves the pointer.',
+    setup(ctx) {
+      ctx.root.classList.add('h2');
+      const tl = ctx.$('#tl'); let py = -1, near = 0, last = performance.now();
+      ctx.listen(window, 'pointermove', e => { py = e.clientY; });
+      ctx.listen(document.documentElement, 'pointerleave', () => { py = -1; });
+      ctx.listen(window, 'blur', () => { py = -1; });
+      const ss = (a, b, x) => { const k = Math.min(1, Math.max(0, (x - a) / (b - a))); return k * k * (3 - 2 * k); };
+      ctx.on('frame', () => {
+        const now = performance.now(), dt = Math.min(.064, (now - last) / 1000) * ctx.speed; last = now;
+        const d = innerHeight * .9 - py;
+        const target = py < 0 ? 0 : ctx.reduced ? (d < 140 ? 1 : 0) : 1 - ss(40, 240, d);
+        const lam = ctx.reduced ? 12 : target > near ? 10 : 4;
+        near = target + (near - target) * Math.exp(-lam * dt);
+        if (Math.abs(near - target) < 1e-3) near = target;
+        tl.style.setProperty('--near', near.toFixed(4));
+      });
+    },
+    async play(ctx) {
+      const p = ctx.pointer;
+      await ctx.wait(1400);
+      p.show(880, 330); await ctx.wait(500);
+      await p.to(640, 690, 1700, 'soft');          // the frames start rising around y ≈ 570
+      await p.to(500, 852, 1000, 'soft');          // onto Telekom
+      await ctx.wait(1200);
+      await p.to(820, 856, 1300, 'soft', -10);     // Red Bull
+      await ctx.wait(900);
+      await p.to(1200, 854, 1100, 'soft', -8);     // the collection (unnamed; hover names it)
+      await ctx.wait(1000);
+      await p.to(980, 300, 1700, 'soft');          // leave: the frames sink back
+      p.hide();
+    }
+  },
+
+  /* ────────────────────────────────────────────────────────────────────────
+     H3 · the timeline breathes
+
+     Hovering the timeline grows it from 10vh to 16vh: the reel gives way by the same amount (its
+     frame closes from the top and bottom and the film recentres), the clips open up from a
+     letterboxed slit to whole frames and brighten. Leaving lets it breathe back out.
+     Timing at 1×:
+       grow         one value g (0 → 1) on a critically damped spring, ω = 6.5/s: soft start, soft
+                    landing, ≈ 0.75 s to settle; leaving mid-grow retargets from the current value and
+                    velocity, so it never snaps or restarts. One custom property (--g) on the page
+                    drives everything:
+         reel       translateY 0 → −27 px and clip-path inset 0 → 27 px top and bottom (no layout).
+         timeline   its stage panel rises 54 px; the track lifts 27 px; each clip's clip-path opens
+                    from a centred 48 px slit to the full 84 px frame; the playhead line scales to fit.
+         frames     a black veil over the strips thins (brightness ≈ .30 → .52).
+         caption    rises 54 px with the reel's edge.
+       intent       enter at the timeline's edge; leave 6 px above its current edge, after 180 ms.
+     Scripted demo: a pointer dot comes down onto the timeline (it grows), glides across Red Bull
+     to the collection, then leaves upwards (it breathes back).
+     Reduced motion: no geometry; only the frames brighten (≈ 250 ms fade); no autoplay.
+     ──────────────────────────────────────────────────────────────────────── */
+  H3: {
+    title: 'the timeline breathes',
+    does: 'hover grows the timeline · the reel gives way',
+    why: 'The frames become readable exactly when you look at them, and the reel stays full the rest of the time · the whole screen moves on a hover, so it must stay calm or it nags.',
+    setup(ctx) {
+      const root = ctx.root; root.classList.add('h3');
+      let py = -1, g = 0, v = 0, b = 0, inside = false, outFor = 0, last = performance.now();
+      ctx.listen(window, 'pointermove', e => { py = e.clientY; });
+      ctx.listen(document.documentElement, 'pointerleave', () => { py = -1; });
+      ctx.listen(window, 'blur', () => { py = -1; });
+      ctx.on('frame', () => {
+        const now = performance.now(), dt = Math.min(.064, (now - last) / 1000) * ctx.speed; last = now;
+        const H = innerHeight, edge = H * .9 - 54 * g;
+        if (py >= 0 && py >= (inside ? edge - 6 : H * .9)) { inside = true; outFor = 0; }
+        else if (inside) { outFor += dt; if (outFor > .18) inside = false; }
+        const T = inside ? 1 : 0;
+        if (ctx.reduced) { b = T + (b - T) * Math.exp(-12 * dt); g = 0; }
+        else {
+          const w = 6.5; let left = dt;                       // critically damped spring, sub-stepped
+          while (left > 0) { const h = Math.min(left, 1 / 240); v += (w * w * (T - g) - 2 * w * v) * h; g += v * h; left -= h; }
+          if (Math.abs(T - g) < 1e-4 && Math.abs(v) < 1e-3) { g = T; v = 0; }
+          g = Math.min(1, Math.max(0, g)); b = g;
+        }
+        root.style.setProperty('--g', g.toFixed(4)); root.style.setProperty('--b', b.toFixed(4));
+      });
+    },
+    async play(ctx) {
+      const p = ctx.pointer;
+      await ctx.wait(1400);
+      p.show(760, 380); await ctx.wait(500);
+      await p.to(560, 852, 1500, 'soft');          // onto the timeline: it grows
+      await ctx.wait(1300);
+      await p.to(820, 832, 1500, 'soft', -12);     // across Red Bull
+      await ctx.wait(1000);
+      await p.to(1190, 830, 1000, 'soft', -8);     // the collection
+      await ctx.wait(1000);
+      await p.to(900, 360, 1500, 'soft');          // leave: it breathes back
+      p.hide();
     }
   }
 });
