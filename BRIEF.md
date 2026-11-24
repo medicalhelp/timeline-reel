@@ -33,27 +33,29 @@ Measured against the intro in `medicalhelp/the-archive` (feel, not copy) and Ari
 8. **Every piece has a comment block with its timing,** like the assistant explorations.
 
 ## 5. The explorations (10)
-**H · Home**
-- **H1 · the reel and the timeline** (the reference): autoplay through all clips, playhead running, caption changing, name, role and contact; click a clip to jump (the playhead glides, the reel crossfades); hover a clip.
-- **H2 · a quieter timeline**: logos only on a hairline track, no ruler; the playhead is a soft light rather than a line.
-- **H3 · the timeline as a CV**: a year ruler and timecode, clip widths by reel length, years and roles readable at a glance.
+_Updated after H1 feedback: five clips (IKEA, Telekom, Red Bull, then the recipe app and the collection), frame strips with white logos, personal clips unnamed, no ruler or timecode, the playhead a single line._
 
-**S · Scrubbing**
-- **S1 · drag to scrub**: grab the timeline or playhead; the reel follows frame by frame with smoothing; release with a little inertia and settle on the nearest clip.
-- **S2 · hover to preview**: hovering a clip shows its film in the reel after a short delay, and returning to the playhead resumes.
+**H · Home** (`home.html`)
+- **H1 · the reel and the timeline** (the reference, done).
+- **H2 · frames on approach**: at rest the timeline shows only the logos on black; when the pointer comes near the timeline, the frame strips fade up underneath.
+- **H3 · the timeline breathes**: hovering the timeline grows it from 10vh to about 16vh (the reel gives way by the same amount), frames brighten and read better; leaving shrinks it back.
 
-**T · Opening a case study**
-- **T1 · the reel becomes the hero**: click a logo; the playing film settles into the case study's hero, the timeline travels to the top and re-forms as the sections; the page continues below. No cut.
-- **T2 · zoom into the clip**: the timeline zooms into the clicked clip until it fills the strip and splits into its sections; the reel follows into the case study.
+**S · Scrubbing** (`scrub.html`)
+- **S1 · drag to scrub**: grab anywhere on the timeline; the playhead follows the pointer with smoothing, the reel shows that moment of the film; on release a short inertia carries it on and it settles on the nearest clip start or keeps playing from there.
+- **S2 · hover to preview**: resting on a clip for about 300 ms shows its film in the reel (the playhead stays where it was, a ghost line marks the hovered point); leaving returns to the playing clip.
 
-**C · Case study**
-- **C1 · the timeline as section navigation**: a case study page with the timeline at the top; the playhead follows the scroll; clicking a section scrolls there smoothly; neighbouring projects as thin clips at the ends.
+**T · Opening a case study** (`case.html`)
+- **T1 · the reel becomes the hero**: click a logo; the playing film settles into the case study's hero (it shrinks from full bleed into the hero frame), the timeline travels to the top and re-forms as that company's sections; the page continues below. No cut.
+- **T2 · zoom into the clip**: click a logo; the timeline zooms into the clicked clip until it fills the strip and splits into its sections, then the case study appears beneath it.
 
-**K · Caption**
-- **K1 · the caption as a lower third**: company, project, role and year change in sync with the cut, each line sliding in on its own beat.
+**C · Case study** (`case.html`)
+- **C1 · the timeline as section navigation**: a case study page (IKEA as the example) with the timeline at the top: its clips are the sections (problem, research, concepts, design, outcome); the playhead follows the scroll; clicking a section scrolls there smoothly; the neighbouring companies sit as thin clips at both ends to step to.
 
-**I · Arrival**
-- **I1 · first load**: the name and the timeline assemble, the first film fades up, the playhead starts: one continuous gesture in the archive's spirit.
+**K · Caption** (`caption.html`)
+- **K1 · the caption as a lower third**: the company's white logo replaces its name in the caption; project and role sit under it; on each clip change every line leaves and arrives on its own beat, and inside a clip the second line names the film being shown.
+
+**I · Arrival** (`arrive.html`)
+- **I1 · first load**: the name settles in, the timeline's clips draw in from left to right with their logos, the first film fades up and the playhead starts moving: one continuous gesture in the archive's spirit.
 
 ## 6. Out of scope
 Mobile; real project content; real logos; sound design; the full case study text.
