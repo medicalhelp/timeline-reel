@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Portfolio Board</title>
+<style>
+/* A pannable, zoomable canvas (the recipe app's board engine), restyled for the collection.
+   Every phone is a live exploration in a frame; it plays when tapped. Content: board-data.js */
+:root{
+  --font:-apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif;
+  --serif:ui-serif,"New York",Georgia,serif;
+  --board-bg:#efefee; --board-dot:#d9d9d6; --board-card:#fcfcfc; --board-ink:#111; --board-muted:#6f6f6f; --board-edge:rgba(17,17,17,.08); --focus:#111;
+  --warm:linear-gradient(90deg,rgb(255,190,125),rgb(255,135,175) 50%,rgb(175,140,255));
+  --phone-w:720px; --phone-h:450px; --gap:64px; --row:1110px; --lane-x:420px;
+}
+@media (prefers-color-scheme:dark){:root{--board-bg:#0f0f10;--board-dot:#232326;--board-card:#1b1b1d;--board-ink:#f3f3f3;--board-muted:#9b9b9f;--board-edge:rgba(255,255,255,.1);--focus:#f3f3f3;color-scheme:dark}}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--board-bg);color:var(--board-ink);font:400 15px/1.45 var(--font);-webkit-font-smoothing:antialiased;text-transform:lowercase}
+button{font:inherit;color:inherit;text-transform:inherit}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.board{position:fixed;inset:0;overflow:hidden;cursor:grab;touch-action:none;-webkit-user-select:none;user-select:none;
+  background-image:radial-gradient(var(--board-dot) 1px,transparent 1.2px);background-size:24px 24px}
+.board.panning{cursor:grabbing}
+.world{position:absolute;left:0;top:0;transform-origin:0 0}
+.node,.note,.lane-line{position:absolute}
+
+/* phones */
+.node{display:grid;gap:14px;justify-items:center;width:var(--phone-w)}
+.phone{position:relative;width:var(--phone-w);height:var(--phone-h);border-radius:10px;overflow:hidden;background:#0a0a0b;box-shadow:0 0 0 1px var(--board-edge),0 30px 60px -30px rgba(17,17,17,.25)}
+.phone iframe{width:1440px;height:900px;border:0;display:block;transform:scale(.5);transform-origin:0 0}
+.cap{display:grid;gap:6px;text-align:left;width:100%;padding:0 6px}
+.cap .id{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--board-muted);letter-spacing:.02em}
+.cap .id b{color:var(--board-ink);font-weight:500}
+.cap .said{margin:0;font:500 22px/1.2 var(--serif);letter-spacing:-.015em;text-transform:none}
+.cap .said::before{content:"“"}.cap .said::after{content:"”"}
+.cap .why{margin:0;font-size:13px;color:var(--board-muted);text-transform:none}
+.cap .said.moment::before,.cap .said.moment::after{content:""}
+.cap .how{margin:0;font-size:13px;color:var(--board-ink,#111);text-transform:none}
+.cap .how b{font-weight:600}
+.cap .btns{display:flex;gap:6px;margin-top:2px}
+.cap .btns button{height:30px;padding:0 12px;border:0;border-radius:15px;background:var(--board-card);box-shadow:0 0 0 1px var(--board-edge);font-size:12px;cursor:pointer}
+.cap .btns button:hover{box-shadow:0 0 0 1px var(--board-ink)}
+
+/* notes */
+.note{width:360px;display:grid;gap:10px;padding:22px;background:var(--board-card);border-radius:20px;box-shadow:0 0 0 1px var(--board-edge);cursor:auto;-webkit-user-select:text;user-select:text}
+.note h2{margin:0;font:500 30px/1.05 var(--serif);letter-spacing:-.02em}
+.note p{margin:0;color:var(--board-muted);text-transform:none}
+.kicker{font-size:12px;letter-spacing:.09em;font-variant-caps:all-small-caps;font-weight:500;color:var(--board-muted)}
+.note .bar{height:4px;border-radius:2px;background:var(--warm);width:56px}
+.lane-line{left:0;border-top:1px solid var(--board-edge)}
+.note.intro{width:720px}
+.note.intro h2{font-size:40px}
+
+/* chrome */
+.top{position:fixed;top:12px;left:16px;z-index:20;display:flex;align-items:center;gap:14px;padding:8px 16px;border-radius:16px;background:color-mix(in srgb,var(--board-card) 86%,transparent);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);box-shadow:0 0 0 1px var(--board-edge)}
+.top b{font:500 17px/1 var(--serif);letter-spacing:-.01em}
+.top span{color:var(--board-muted);font-size:13px}
+.top i{display:block;width:22px;height:4px;border-radius:2px;background:var(--warm)}
+.zoom{position:fixed;right:16px;bottom:16px;z-index:20;display:flex;align-items:center;gap:2px;padding:4px;border-radius:14px;background:color-mix(in srgb,var(--board-card) 86%,transparent);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);box-shadow:0 0 0 1px var(--board-edge)}
+.zoom button{min-width:36px;height:34px;border:0;border-radius:10px;background:transparent;cursor:pointer;padding:0 8px}
+.zoom button:hover{background:var(--board-edge)}
+.zoom span{min-width:46px;text-align:center;font-size:12px;color:var(--board-muted);font-variant-numeric:tabular-nums}
+.toc{position:fixed;left:16px;bottom:16px;z-index:20;display:flex;gap:4px;flex-wrap:wrap;max-width:calc(100vw - 260px);padding:4px;border-radius:14px;background:color-mix(in srgb,var(--board-card) 86%,transparent);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);box-shadow:0 0 0 1px var(--board-edge)}
+.toc button{height:30px;padding:0 10px;border:0;border-radius:10px;background:transparent;font-size:12px;cursor:pointer}
+.toc button:hover{background:var(--board-edge)}
+</style>
+</head>
+<body>
+<header class="top"><i></i><b id="t"></b><span id="st"></span><a href="BRIEF.md" style="margin-left:auto;color:inherit;font-size:13px;opacity:.75;text-decoration:underline;text-underline-offset:3px;white-space:nowrap">brief</a></header>
+<div class="board" id="board" aria-label="Design board. Drag the background to pan; pinch, or Ctrl or Command with the scroll wheel, to zoom.">
+  <div class="world" id="world"></div>
+</div>
+<nav class="toc" id="toc" aria-label="jump to a cluster"></nav>
+<div class="zoom" role="group" aria-label="zoom">
+  <button type="button" data-zoom="out" aria-label="zoom out">&minus;</button>
+  <span id="zl" aria-live="polite">100%</span>
+  <button type="button" data-zoom="in" aria-label="zoom in">+</button>
+  <button type="button" data-zoom="fit">fit</button>
+</div>
+<script src="board-data.js"></script>
+<script>
+(function () {
+  const B = window.BOARD, world = document.getElementById('world'), board = document.getElementById('board');
+  const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const W = 720, H = 450, GAP = 56, ROW = 760, LX = 440;
+  document.getElementById('t').textContent = B.title; document.getElementById('st').textContent = B.subtitle;
+
+  // layout: intro on top, then one lane per cluster
+  let html = '', y = 0, maxW = 0;
+  html += `<div class="note intro" style="left:0;top:0"><span class="bar"></span><p class="kicker">${esc(B.intro.kicker)}</p><h2>${esc(B.intro.title)}</h2>${B.intro.body.map(p => `<p>${esc(p)}</p>`).join('')}</div>`;
+  y = 420;
+  const toc = [];
+  B.lanes.forEach(l => {
+    html += `<div class="lane-line" style="top:${y - 40}px;width:${LX + Math.max(1, l.items.length) * (W + GAP)}px"></div>`;
+    html += `<div class="note" id="lane-${l.id}" style="left:0;top:${y}px"><span class="bar"></span><p class="kicker">${esc(l.kicker)}</p><h2>${esc(l.title)}</h2><p>${esc(l.note)}</p>${l.open ? `<p><b>open:</b> ${esc(l.open)}</p>` : ''}</div>`;
+    l.items.forEach((it, i) => {
+      const x = LX + i * (W + GAP), page = it.page || l.page;
+      html += `<div class="node" style="left:${x}px;top:${y}px"><div class="phone"><iframe title="${esc(it.id + ' · ' + it.title)}" src="${esc(page)}?screen=${esc(it.id)}&nohint" loading="lazy"></iframe></div>
+        <div class="cap"><span class="id"><b>${esc(it.id)}</b>${esc(it.title)}</span><p class="said${it.moment ? ' moment' : ''}">${esc(it.said)}</p>${it.how ? `<p class="how"><b>how it works</b> · ${esc(it.how)}</p>` : ''}<p class="why">${esc(it.why)}</p>
+        <span class="btns"><button type="button" data-play="1">replay</button><button type="button" data-play="0.25">0.25×</button></span></div></div>`;
+      maxW = Math.max(maxW, x + W);
+    });
+    toc.push(`<button type="button" data-jump="${l.id}">${esc(l.id)} · ${esc(l.title)}</button>`);
+    y += ROW;
+  });
+  world.innerHTML = html;
+  document.getElementById('toc').innerHTML = toc.join('');
+
+  // pan and zoom (the recipe app's engine)
+  const label = document.getElementById('zl'), view = { x: 0, y: 0, s: 1 }, MIN = .08, MAX = 2;
+  const apply = () => { world.style.transform = `translate(${view.x}px,${view.y}px) scale(${view.s})`; label.textContent = Math.round(view.s * 100) + '%'; };
+  const zoomAt = (cx, cy, s) => { s = Math.max(MIN, Math.min(MAX, s)); view.x = cx - (cx - view.x) * (s / view.s); view.y = cy - (cy - view.y) * (s / view.s); view.s = s; apply(); };
+  const bounds = () => { let w = 0, h = 0; world.querySelectorAll('.node,.note').forEach(el => { w = Math.max(w, el.offsetLeft + el.offsetWidth); h = Math.max(h, el.offsetTop + el.offsetHeight); }); return { w, h }; };
+  function fit(rect) {
+    const b = rect || bounds(), pad = 48, top = 72;
+    view.s = Math.max(MIN, Math.min((board.clientWidth - pad * 2) / b.w, (board.clientHeight - top - pad - 50) / b.h, 1));
+    view.x = (board.clientWidth - b.w * view.s) / 2 - (b.x || 0) * view.s; view.y = top + 8 - (b.y || 0) * view.s; apply();
+  }
+  board.addEventListener('wheel', e => {
+    e.preventDefault();
+    if (e.ctrlKey || e.metaKey) { const r = board.getBoundingClientRect(); zoomAt(e.clientX - r.left, e.clientY - r.top, view.s * Math.exp(-e.deltaY * .01)); return; }
+    view.x -= e.deltaX; view.y -= e.deltaY; apply();
+  }, { passive: false });
+  const pts = new Map(); let pan = null, pinch = null;
+  board.addEventListener('pointerdown', e => {
+    if (e.target.closest('.note,.cap')) return;
+    pts.set(e.pointerId, { x: e.clientX, y: e.clientY }); board.setPointerCapture(e.pointerId);
+    if (pts.size === 1) { pan = { x: e.clientX - view.x, y: e.clientY - view.y }; board.classList.add('panning'); }
+    if (pts.size === 2) { const a = [...pts.values()]; pinch = { d: Math.hypot(a[0].x - a[1].x, a[0].y - a[1].y), s: view.s }; pan = null; }
+  });
+  board.addEventListener('pointermove', e => {
+    if (!pts.has(e.pointerId)) return; pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (pinch && pts.size === 2) { const a = [...pts.values()], r = board.getBoundingClientRect(); zoomAt((a[0].x + a[1].x) / 2 - r.left, (a[0].y + a[1].y) / 2 - r.top, pinch.s * Math.hypot(a[0].x - a[1].x, a[0].y - a[1].y) / pinch.d); }
+    else if (pan) { view.x = e.clientX - pan.x; view.y = e.clientY - pan.y; apply(); }
+  });
+  const up = e => { pts.delete(e.pointerId); if (pts.size < 2) pinch = null; if (!pts.size) { pan = null; board.classList.remove('panning'); } };
+  board.addEventListener('pointerup', up); board.addEventListener('pointercancel', up);
+  const zc = f => zoomAt(board.clientWidth / 2, board.clientHeight / 2, view.s * f);
+  document.querySelector('.zoom').addEventListener('click', e => { const b = e.target.closest('[data-zoom]'); if (!b) return; if (b.dataset.zoom === 'in') zc(1.2); if (b.dataset.zoom === 'out') zc(1 / 1.2); if (b.dataset.zoom === 'fit') fit(); });
+  document.addEventListener('keydown', e => { if (e.key === '+' || e.key === '=') zc(1.2); if (e.key === '-') zc(1 / 1.2); if (e.key === '0') fit(); });
+  board.addEventListener('scroll', () => { board.scrollTop = 0; board.scrollLeft = 0; });
+
+  // play buttons talk to the phone
+  world.addEventListener('click', e => {
+    const b = e.target.closest('[data-play]'); if (!b) return;
+    const f = b.closest('.node').querySelector('iframe'); f.contentWindow.postMessage({ pf: 'play', speed: +b.dataset.play }, '*');
+  });
+  // jump to a lane
+  document.getElementById('toc').addEventListener('click', e => {
+    const b = e.target.closest('[data-jump]'); if (!b) return;
+    const n = document.getElementById('lane-' + b.dataset.jump), lane = B.lanes.find(l => l.id === b.dataset.jump);
+    fit({ x: 0, y: n.offsetTop - 20, w: LX + Math.min(4, lane.items.length) * (W + GAP), h: ROW - 40 });
+  });
+
+  fit({ x: 0, y: 0, w: Math.max(1200, LX + 3 * (W + GAP)), h: 420 + ROW });
+  window.addEventListener('resize', () => fit());
+})();
+</script>
+</body>
+</html>

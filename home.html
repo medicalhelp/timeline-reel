@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>home</title>
+<link rel="stylesheet" href="kit/pf.css">
+</head>
+<body>
+<script src="kit/pf.js"></script>
+<script>
+/* ──────────────────────────────────────────────────────────────────────────
+   H1 · the reel and the timeline  (the reference)
+
+   Live: the reel autoplays through all 20 clips (≈ 2 min), the playhead runs in
+   real time, the caption changes on every cut. Click a clip (or ← →, space) to take over.
+   Timing at 1×:
+     cut          the next film is already playing on the hidden layer; it fades up over
+                  1.0 s on the master curve (.601,0,.405,1) while settling from scale
+                  1.045 → 1 over 1.6 s (expo-out); the old layer fades 160 ms later.
+     caption      each line slides up and out (260 ms, expo-in, 30 ms stagger), then the
+                  new lines rise in from below their mask (900 ms, expo-out, 70 ms stagger).
+     playhead     linear while playing (it is real time); on a click it glides to the clip
+                  over 1.1 s on the master curve, chasing the clock so it never stops.
+     clips        background and logo brighten on hover and for the current clip (260 ms).
+   Scripted demo (board "replay"): plays 4 s, then clicks three clips across the timeline.
+   Reduced motion: no autoplay, crossfades only, no glide.
+   ────────────────────────────────────────────────────────────────────────── */
+Pf.define({
+  H1: {
+    title: 'the reel and the timeline',
+    does: 'autoplays · click a clip to jump',
+    why: 'Shows the work moving within a second, and the career at a glance underneath · the films carry it, so weak footage shows.',
+    async play(ctx) {
+      await ctx.wait(4200);
+      for (const i of [6, 13, 16]) { ctx.jump(i); await ctx.wait(3400); }
+    }
+  }
+});
+</script>
+</body>
+</html>
