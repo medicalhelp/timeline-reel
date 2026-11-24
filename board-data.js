@@ -9,7 +9,7 @@ window.BOARD = {
     body: [
       'The top 90% plays one short film per project, back to back; the bottom 10% is the timeline of those films, ordered by time, with a playhead. Clicking a clip opens its case study, and the timeline becomes that page’s navigation.',
       'Dark, cinematic, quiet type. Butter-smooth motion on one master clock, measured against the archive intro and Aristide Benoist.',
-      'Films are stand-ins recorded from real work; company names and logos are placeholders. Full brief: BRIEF.md.'
+      'Films are stand-ins recorded from real work; roles and years are still to confirm. Logos from Wikimedia Commons, set in white. Full brief: BRIEF.md.'
     ]
   },
   lanes: [
@@ -18,7 +18,7 @@ window.BOARD = {
       note: 'The first screen: the reel plays, the timeline indexes it, the caption names it. H1 is the reference for the round.',
       page: 'home.html',
       items: [
-        { id: 'H1', moment: true, title: 'the reel and the timeline', said: 'autoplays · click a clip to jump', why: 'Shows the work moving within a second, and the career at a glance underneath · the films carry it, so weak footage shows.' }
+        { id: 'H1', moment: true, title: 'the reel and the timeline', said: 'autoplays · click a clip to jump', why: 'Shows the work moving within a second; the timeline is the career: IKEA, Telekom, Red Bull as long clips with their logos over dimmed frames, two personal projects unnamed · the films carry it, so weak footage shows.' }
       ]
     }
   ]

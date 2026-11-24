@@ -46,6 +46,13 @@ A product design portfolio built like a video editor's timeline.
 16. **Look to start from:** dark, cinematic, quiet type, like a screening room. A near-black stage so the films glow, white logos, small precise type.
 17. **Where:** `docs/design/portfolio/` in this repo for now, moving out later.
 
+**Round 1 feedback on H1 (2026-11-24)**
+18. **Frames on the timeline:** each clip is a film strip of frames from its own film (like an editor), dimmed, with the logo in white on top.
+19. **Fewer, longer clips:** one long clip per company, in order **IKEA, Telekom, Red Bull** (oldest first), about 20–30 s each, made of several films; the projects inside become the case study's sections.
+20. **Personal projects:** the recipe app and the collection, unnamed on the timeline (hover names them), placed by date (both 2026, so after the companies). The collection clip shows several assistant explorations full screen, one after another.
+21. **Logos:** IKEA, Telekom and Red Bull from Wikimedia Commons, converted to white SVGs (`docs/design/portfolio/media/logos-*.svg`).
+
 ## Open
+- Roles and years per company.
 - What a clip's length means (duration, equal, importance): decide once the reel is cut.
 - Mobile.

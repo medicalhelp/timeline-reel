@@ -12,8 +12,10 @@
 /* ──────────────────────────────────────────────────────────────────────────
    H1 · the reel and the timeline  (the reference)
 
-   Live: the reel autoplays through all 20 clips (≈ 2 min), the playhead runs in
-   real time, the caption changes on every cut. Click a clip (or ← →, space) to take over.
+   Live: the reel autoplays through the five clips (IKEA, Telekom, Red Bull, then two personal
+   projects; ≈ 2 min), each clip a sequence of films; the playhead runs in real time; the
+   caption changes per clip, not per cut. The timeline shows frames from the films, dimmed,
+   with the company logos in white on top; personal clips have no label (hover names them). Click a clip (or ← →, space) to take over.
    Timing at 1×:
      cut          the next film is already playing on the hidden layer; it fades up over
                   1.0 s on the master curve (.601,0,.405,1) while settling from scale
@@ -23,7 +25,7 @@
      playhead     linear while playing (it is real time); on a click it glides to the clip
                   over 1.1 s on the master curve, chasing the clock so it never stops.
      clips        background and logo brighten on hover and for the current clip (260 ms).
-   Scripted demo (board "replay"): plays 4 s, then clicks three clips across the timeline.
+   Scripted demo (board "replay"): plays 4 s, then clicks Telekom, Red Bull and the collection.
    Reduced motion: no autoplay, crossfades only, no glide.
    ────────────────────────────────────────────────────────────────────────── */
 Pf.define({
@@ -33,7 +35,7 @@ Pf.define({
     why: 'Shows the work moving within a second, and the career at a glance underneath · the films carry it, so weak footage shows.',
     async play(ctx) {
       await ctx.wait(4200);
-      for (const i of [6, 13, 16]) { ctx.jump(i); await ctx.wait(3400); }
+      for (const i of [1, 2, 4]) { ctx.jump(i); await ctx.wait(3600); }
     }
   }
 });

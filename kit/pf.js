@@ -12,35 +12,29 @@
   'use strict';
   const BASE = (document.currentScript && document.currentScript.src.replace(/kit\/pf\.js.*$/, '')) || '';
 
-  /* ── placeholder projects: 20 clips, ordered by time. Names and logos are invented placeholders. ── */
-  const P = (co, lg, pr, role, yr, kind, film, from, len) => ({ co, lg, pr, role, yr, kind, film, from, len });
+  /* ── the projects, ordered by time (oldest first). One long clip per company, made of several film
+        segments; personal projects are unnamed on the timeline. Films are stand-ins; roles and years to confirm. ── */
+  const SPF = 2;                                   // strip sprites: frames per second (media/strip-<film>.jpg, 128×72 each)
+  const FDUR = { a1: 9.37, archive: 6.47, board: 9.13, 'collection-home': 6.73, 'collection-recipes': 6.73, f1: 8.87, f2: 9.83, f4: 8.87, g3: 9.33, g4: 8.87, o3: 8.93, p5: 7.93, 'recipe-page': 6.77 };
+  const LOGO = { ikea: { h: 15 }, telekom: { h: 22 }, redbull: { h: 16 } };
   const PROJECTS = [
-    P('Field', 'a', 'studio identity', 'designer', '2014', 'work', 'archive', 0.2, 5.6),
-    P('', '', 'type specimen', 'self-initiated', '2014', 'personal', 'recipe-page', 0.5, 4.8),
-    P('Halden', 'b', 'booking flow', 'ux designer', '2015 – 2016', 'work', 'collection-home', 0.3, 6.0),
-    P('OKRA', 'd', 'kitchen planner', 'product designer', '2016', 'work', 'collection-recipes', 0.4, 6.0),
-    P('', '', 'photo archive', 'self-initiated', '2017', 'personal', 'archive', 1.5, 4.8),
-    P('Morrow', 'c', 'banking app', 'product designer', '2017 – 2018', 'work', 'a1', 0.6, 7.6),
-    P('Lumen', 'e', 'design system', 'lead designer', '2018 – 2019', 'work', 'board', 0.3, 6.8),
-    P('Aster', 'a', 'onboarding', 'product designer', '2019', 'work', 'g3', 0.4, 7.4),
-    P('', '', 'motion studies', 'self-initiated', '2019', 'personal', 'f2', 1.0, 5.6),
-    P('Kite', 'c', 'travel planner', 'senior designer', '2020', 'work', 'collection-home', 2.0, 4.6),
-    P('Northfold', 'b', 'retail checkout', 'senior designer', '2020 – 2021', 'work', 'recipe-page', 1.4, 5.2),
-    P('OKRA', 'd', 'room configurator', 'senior designer', '2021', 'work', 'collection-recipes', 1.2, 5.4),
-    P('', '', 'recipe app', 'self-initiated', '2022', 'personal', 'recipe-page', 0.2, 6.2),
-    P('Lumen', 'e', 'tokens 2.0', 'lead designer', '2022', 'work', 'board', 2.4, 6.4),
-    P('Halden', 'b', 'host tools', 'lead designer', '2023', 'work', 'a1', 1.8, 7.2),
-    P('', '', 'the archive', 'self-initiated', '2023', 'personal', 'archive', 0.0, 6.4),
-    P('Aster', 'a', 'ai assistant', 'principal designer', '2024', 'work', 'g3', 1.6, 7.4),
-    P('Morrow', 'c', 'wealth dashboard', 'principal designer', '2024 – 2025', 'work', 'collection-home', 0.6, 6.0),
-    P('', '', 'collection', 'self-initiated', '2025', 'personal', 'collection-recipes', 0.4, 6.2),
-    P('Aster', 'a', 'assistant, layer', 'principal designer', '2026', 'work', 'f2', 0.4, 9.0)
+    { co: 'IKEA', logo: 'ikea', kind: 'work', pr: 'product design', role: 'product designer', yr: 'years to confirm',
+      segs: [['archive', 0.2, 6.0], ['collection-home', 0.3, 6.2], ['board', 0.4, 8.4], ['collection-recipes', 0.4, 6.0]] },
+    { co: 'Telekom', logo: 'telekom', kind: 'work', pr: 'product design', role: 'product designer', yr: 'years to confirm',
+      segs: [['board', 0.3, 8.6], ['collection-home', 0.4, 6.0], ['recipe-page', 0.3, 6.2], ['archive', 0.2, 6.0]] },
+    { co: 'Red Bull', logo: 'redbull', kind: 'work', pr: 'product design', role: 'product designer', yr: 'years to confirm',
+      segs: [['collection-recipes', 0.3, 6.2], ['archive', 0.6, 5.6], ['board', 1.0, 7.8], ['collection-home', 0.3, 6.2]] },
+    { co: '', name: 'recipe app', kind: 'personal', pr: 'recipe app', role: 'self-initiated', yr: '2026',
+      segs: [['recipe-page', 0.3, 6.3]] },
+    { co: '', name: 'collection', kind: 'personal', pr: 'collection', role: 'self-initiated', yr: '2026',
+      segs: [['a1', 0.6, 4.4], ['g3', 0.8, 4.2], ['f2', 0.8, 4.6], ['p5', 0.6, 4.0], ['g4', 0.8, 4.0], ['f4', 0.6, 4.2], ['f1', 0.4, 4.4]] }
   ];
-  let acc = 0; PROJECTS.forEach((p, i) => { p.i = i; p.start = acc; acc += p.len; });
+  let acc = 0; PROJECTS.forEach((p, i) => { p.i = i; p.start = acc; let a = 0; p.segs = p.segs.map(([film, from, len]) => { const g = { film, from, len, start: a }; a += len; return g; }); p.len = a; acc += a; });
   const TOTAL = acc;
-  const FILMS = [...new Set(PROJECTS.map(p => p.film))];
+  const FILMS = [...new Set(PROJECTS.flatMap(p => p.segs.map(g => g.film)))];
   const EXT = document.createElement('video').canPlayType('video/mp4; codecs="avc1.42E01E"') ? 'mp4' : 'webm';
   const film = n => `${BASE}media/${n}.${EXT}`;
+  const segAt = (p, local) => { for (let k = p.segs.length - 1; k >= 0; k--) if (local >= p.segs[k].start - 1e-6) return k; return 0; };
 
   /* ── easing: cubic-bezier solver (for rAF-driven motion) ───────────────── */
   function bezier(x1, y1, x2, y2) {
@@ -69,7 +63,7 @@
       <section class="tl" id="tl" aria-label="timeline">
         <div class="tl-ruler" id="ruler"></div>
         <div class="tl-track" id="track">
-          ${PROJECTS.map(p => `<button class="clip ${p.kind}" data-i="${p.i}" aria-label="${esc((p.co || p.pr) + ', ' + p.pr + ', ' + p.yr)}">${p.kind === 'personal' ? `<span class="tag">personal</span>` : `<span class="logo lg-${p.lg}">${esc(p.co)}</span>`}</button>`).join('')}
+          ${PROJECTS.map(p => `<button class="clip ${p.kind}" data-i="${p.i}" aria-label="${esc(p.kind === 'personal' ? p.name + ', personal project' : p.co + ', ' + p.yr)}"><span class="strip" aria-hidden="true"></span>${p.kind === 'work' ? `<img class="logo" src="${BASE}media/logos-${p.logo}.svg" alt="" style="height:${LOGO[p.logo].h}px">` : ''}</button>`).join('')}
           <div class="tip" id="tip" aria-hidden="true"></div><div class="head" id="head"><span class="tc" id="tcode">00:00:00</span></div>
         </div>
       </section>`;
@@ -83,7 +77,17 @@
     const xOf = t => (t / TOTAL) * W;
     function layout() {
       W = track.clientWidth;
-      clips.forEach((c, i) => { const p = PROJECTS[i]; c.style.left = xOf(p.start) + 'px'; c.style.width = Math.max(2, xOf(p.len) - 3) + 'px'; });
+      const H = track.clientHeight, fw = Math.round(H * 16 / 9);
+      clips.forEach((c, i) => {
+        const p = PROJECTS[i], w = Math.max(2, xOf(p.len) - 3); c.style.left = xOf(p.start) + 'px'; c.style.width = w + 'px';
+        // the frame strip: one frame per slot, taken from wherever the film is at that point of the clip
+        const n = Math.max(1, Math.ceil(w / fw)); let html = '';
+        for (let j = 0; j < n; j++) {
+          const local = (j + .5) / n * p.len, g = p.segs[segAt(p, local)], ft = g.from + (local - g.start), N = Math.ceil(FDUR[g.film] * SPF), idx = Math.min(N - 1, Math.floor(ft * SPF));
+          html += `<i style="width:${fw}px;background-image:url('${BASE}media/strip-${g.film}.jpg');background-size:${N * fw}px ${H}px;background-position:${-idx * fw}px 0"></i>`;
+        }
+        c.querySelector('.strip').innerHTML = html;
+      });
       const r = $('#ruler'); r.innerHTML = '';
       if (o.ruler === 'timecode') for (let s = 0; s <= TOTAL; s += 15) r.insertAdjacentHTML('beforeend', `<span style="left:${xOf(s)}px">${tc(s).slice(0, 5)}</span>`);
       if (o.ruler === 'years') PROJECTS.forEach((p, i) => { if (!i || p.yr.slice(0, 4) !== PROJECTS[i - 1].yr.slice(0, 4)) r.insertAdjacentHTML('beforeend', `<span style="left:${xOf(p.start)}px;transform:none">${p.yr.slice(0, 4)}</span>`); });
@@ -96,11 +100,12 @@
 
     // reel: two layers, crossfade with a slow settle (no black frame: the next film is playing before it fades up)
     async function show(i, at = 0, opts2 = {}) {
-      const p = PROJECTS[i], inc = vids[1 - S.layer], out = vids[S.layer];
-      const want = film(p.film);
+      const p = PROJECTS[i], k = segAt(p, at), g = p.segs[k], inc = vids[1 - S.layer], out = vids[S.layer];
+      S.seg = k;
+      const want = film(g.film);
       if (!inc.src.endsWith(want.split('/').pop()) || !inc.src) inc.src = want;
       inc.playbackRate = SPEED;
-      try { inc.currentTime = p.from + at; } catch (e) {}
+      try { inc.currentTime = g.from + (at - g.start); } catch (e) {}
       inc.play().catch(() => {});
       await new Promise(r => { if (inc.readyState >= 2) r(); else { inc.addEventListener('loadeddata', r, { once: true }); setTimeout(r, 900); } });
       S.layer = 1 - S.layer;
@@ -137,9 +142,11 @@
       if (S.playing) {
         S.t += dt;
         if (S.t >= TOTAL) { S.t = 0; setCur(0, 0, { force: true }); S.glide = { from: S.headX, to: 0, t0: now, d: 1400 }; }
-        const i = clipAt(S.t); if (i !== S.cur) setCur(i, S.t - PROJECTS[i].start);
+        const i = clipAt(S.t), local = S.t - PROJECTS[i].start;
+        if (i !== S.cur) setCur(i, local);
+        else if (segAt(PROJECTS[i], local) !== S.seg) show(i, local, { fade: 900 });   // a cut inside the clip: the caption stays
         // keep the film in step with the clock (correct only real drift, never every frame)
-        const v = vids[S.layer], p = PROJECTS[S.cur], want = p.from + (S.t - p.start);
+        const v = vids[S.layer], p = PROJECTS[S.cur], g = p.segs[S.seg || 0], want = g.from + (S.t - p.start - g.start);
         if (v.readyState >= 2 && Math.abs(v.currentTime - want) > .35 && !v.seeking) { try { v.currentTime = want; } catch (e) {} }
       }
       if (S.glide) {
@@ -158,7 +165,7 @@
     const tip = $('#tip'); let tipOn = false;
     clips.forEach(c => {
       c.addEventListener('mouseenter', () => {
-        const p = PROJECTS[+c.dataset.i]; tip.innerHTML = `${esc(p.pr)}<i>${esc(p.yr)}</i>`;
+        const p = PROJECTS[+c.dataset.i]; tip.innerHTML = p.kind === 'personal' ? `${esc(p.name)}<i>personal</i>` : `${esc(p.co)}<i>${esc(p.yr)}</i>`;
         const x = c.offsetLeft + c.offsetWidth / 2;
         if (!tipOn) { tip.style.left = x + 'px'; anim(tip, [{ opacity: 0, transform: 'translate(-50%,6px)' }, { opacity: 1, transform: 'translate(-50%,0)' }], 320, 'arrive'); }
         else anim(tip, [{ left: getComputedStyle(tip).left }, { left: x + 'px' }], 420, 'arrive').finished.then(() => tip.style.left = x + 'px').catch(() => {});
@@ -217,5 +224,5 @@
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
     window.addEventListener('message', e => { const d = e.data || {}; if (d.pf === 'play') run(d.speed || 1); if (d.pf === 'reset') { SPEED = 1; build(); } });
   }
-  window.Pf = { define, PROJECTS, TOTAL, FILMS, EASE, CSS, bezier, tc, esc, film, list: () => Object.entries(DEFS).map(([id, d]) => ({ id, title: d.title, does: d.does, why: d.why })) };
+  window.Pf = { define, PROJECTS, TOTAL, FILMS, segAt, LOGO, EASE, CSS, bezier, tc, esc, film, list: () => Object.entries(DEFS).map(([id, d]) => ({ id, title: d.title, does: d.does, why: d.why })) };
 })();
