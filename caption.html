@@ -24,7 +24,7 @@
    so nothing happens to the film; three small things happen below it, all in the entering clip's brand colour
    (IKEA yellow, Telekom magenta, Red Bull red; the title card and the personal clip use white):
      bar        the clip's bottom bar rises (scaleY 0 → 1 → 3 → 1, 1.1 s, master curve) and settles on the
-                brand underline it keeps (opacity 1 → the clip's rest value).
+                nothing (opacity 1 → 0): at rest no clip carries a colour.
      wash       a soft band of the colour (46 % of the clip) sweeps once from the clip's left edge to its
                 right (translateX −100 % → 220 %, 1.3 s, master curve; opacity 0 → .9 → 0).
      ring       a 14 px ring leaves the playhead and grows to 3× while it fades (0.9 s, expo-out).
@@ -48,7 +48,7 @@ Pf.define({
       const ring = ctx.head.querySelector('.k1ring');
       ctx.on('clip', i => {
         const c = ctx.clips[i], p = PROJECTS[i], wash = c.querySelector('.k1wash'), bar = c.querySelector('.k1bar');
-        const rest = p.rep ? .55 : 0, col = p.color || '#f4f2ee';
+        const rest = 0, col = p.color || '#f4f2ee';
         ring.style.setProperty('--ring', col);
         [wash, bar, ring].forEach(el => el.getAnimations().forEach(a => a.cancel()));
         if (ctx.reduced) {

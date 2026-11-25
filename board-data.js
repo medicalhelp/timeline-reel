@@ -9,7 +9,7 @@ window.BOARD = {
     body: [
       'The top 90% plays one short film per project, back to back; the bottom 10% is the timeline of those films, ordered by time, with a playhead. Clicking a clip opens its case study, and the timeline becomes that page’s navigation.',
       'Dark, cinematic, quiet type. Butter-smooth motion on one master clock, measured against the archive intro and Aristide Benoist.',
-      'The reel is the real Reel 2025 (one continuous film, its title card inverted to white on black). Clips are in the reel’s own order; each brand’s logo shows once, later clips carry a faint brand-colour underline. No captions. Roles and years are still to confirm. Logos from Wikimedia Commons, set in white. Full brief: BRIEF.md.'
+      'The reel is the real Reel 2025 (one continuous film, its title card inverted to white on black). Clips are in the reel’s own order; each brand’s logo shows once, hovering a clip lights its brand across the timeline in the brand colour and fades the rest. No captions. Roles and years are still to confirm. Logos from Wikimedia Commons, set in white. Full brief: BRIEF.md.'
     ]
   },
   lanes: [

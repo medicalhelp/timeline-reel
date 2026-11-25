@@ -14,13 +14,13 @@
 
   /* ── the reel: ONE continuous film (media/reel.mp4, 79.18 s, the real Reel 2025 with its title card inverted: black, white text).
         The timeline is its clips in reel order; each clip is a stretch of that film, so the playhead is the film's own time.
-        A brand's logo is shown once (its first clip); its later clips keep a faint brand underline and show the brand colour on hover.
+        A brand's logo is shown once (its first clip); its later clips carry no logo; hovering any clip of a brand lights the brand across the timeline.
         segs = the film's own shots inside the clip (film time, absolute), used by the case-study galleries.
         Project titles, roles and years are placeholders (the caption is gone, so they only feed labels and case-study copy). ── */
   const SPF = 2;                                   // strip sprite: frames per second (media/strip-reel.jpg, 128×72 each)
   const FDUR = { reel: 79.1833 };
   const LOGO = { ikea: { h: 15 }, telekom: { h: 22 }, redbull: { h: 16 }, disneyplus: { h: 30 } };
-  const BRAND = { ikea: '#ffda1a', telekom: '#e20074', redbull: '#e5173f', disneyplus: '#3b6bff' };   // hover / underline colours (IKEA: the yellow reads on near-black; its blue does not)
+  const BRAND = { ikea: '#ffda1a', telekom: '#e20074', redbull: '#e5173f', disneyplus: '#3b6bff' };   // hover colours (IKEA: the yellow reads on near-black; its blue does not)
   const CUTS = [2.05, 3.0833, 3.8333, 4.5, 7.2333, 8.35, 9.9333, 11.4, 15.4167, 21.9167, 28.3667, 29.5167, 30.25, 31.05, 35.6, 38.2, 41.75, 43.1333, 46.6167, 51.05, 54.9333, 59.7333, 63.4167, 65.65, 67.6667, 68.6667, 75.15, 79.1833];
   const ROLE = 'product designer', YR = 'years to confirm';
   const CLIPS = [   // [kind, brand, from, to, title]  (reel seconds; the boundaries were set with Johannes from a contact sheet)
@@ -82,7 +82,7 @@
       <section class="tl" id="tl" aria-label="timeline">
         <div class="tl-ruler" id="ruler"></div>
         <div class="tl-track" id="track">
-          ${PROJECTS.map(p => `<button class="clip ${p.kind}${p.rep ? ' rep' : ''}" data-i="${p.i}" aria-label="${esc(clipLabel(p))}"${p.color ? ` style="--brand:${p.color}"` : ''}><span class="strip" aria-hidden="true"></span>${p.logoShown ? `<img class="logo" src="${BASE}media/logos-${p.logo}.svg" alt="" draggable="false" style="height:${LOGO[p.logo].h}px">` : ''}</button>`).join('')}
+          ${PROJECTS.map(p => `<button class="clip ${p.kind}${p.rep ? ' rep' : ''}" data-i="${p.i}" data-brand="${p.brand}" aria-label="${esc(clipLabel(p))}"${p.color ? ` style="--brand:${p.color}"` : ''}><span class="strip" aria-hidden="true"></span>${p.logoShown ? `<img class="logo" src="${BASE}media/logos-${p.logo}.svg" alt="" draggable="false" style="height:${LOGO[p.logo].h}px">` : ''}</button>`).join('')}
           <div class="tip" id="tip" aria-hidden="true"></div><div class="head" id="head"></div>
         </div>
       </section>`;
@@ -254,6 +254,11 @@
 
     // input (click jumps to the clip; a page can intercept in the capture phase)
     clips.forEach(c => c.addEventListener('click', e => { e.stopPropagation(); user(); jump(+c.dataset.i); if (S.ended) api.play(); }));
+    // brand focus: hovering a clip lights its brand's clips in the brand colour and fades the rest (see pf.css)
+    const focusOn = c => { const b = PROJECTS[+c.dataset.i].brand;     // no brand (personal, title card): no colour, but the others still fade
+      clips.forEach((k, j) => { const pj = PROJECTS[j]; k.classList.toggle('hv', k === c); k.classList.toggle('full', !!b && k === c && pj.logoShown); k.classList.toggle('half', !!b && k === c && !pj.logoShown); k.classList.toggle('kin', !!b && k !== c && pj.brand === b); k.classList.toggle('dim', k !== c && (!b || pj.brand !== b)); }); };
+    const focusOff = () => clips.forEach(k => k.classList.remove('hv', 'full', 'half', 'kin', 'dim'));
+    clips.forEach(c => { c.addEventListener('mouseenter', () => focusOn(c)); c.addEventListener('mouseleave', focusOff); c.addEventListener('focus', () => { if (c.matches(':focus-visible')) focusOn(c); }); c.addEventListener('blur', focusOff); });
     // hover and keyboard focus: a small label rises above the clip (name · year), and glides between neighbours
     const tip = $('#tip'); let tipOn = false;
     const tipIn = c => {

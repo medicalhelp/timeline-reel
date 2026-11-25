@@ -39,8 +39,7 @@
    Live: the real reel (Reel 2025, 79 s, one continuous film) autoplays; its title card (inverted: white on
    black) is the first clip, then IKEA, Disney+, Telekom, Red Bull, one unnamed personal clip, Telekom, IKEA, Telekom
    in the reel's own order. The playhead is the film's own time. Each brand's logo (white) sits on its first
-   clip only; its later clips carry a faint underline in the brand colour, and every brand clip takes
-   its colour on hover. There is no caption and no text on the timeline (hover names a clip). Click a clip
+   clip only. Nothing is coloured at rest; hovering a clip lights its brand across the timeline (below). There is no caption and no text on the timeline (hover names a clip). Click a clip
    (or ← →, space) to take over.
    Timing at 1×:
      clip change  none to see: the film simply plays on (a click crossfades the film to the clip's start:
@@ -48,8 +47,12 @@
      playhead     a single 1 px line, no timecode or handle; linear while playing (it is real
                   time); on a click it glides to the clip
                   over 1.1 s on the master curve, chasing the clock so it never stops.
-     clips        background brightens on hover and for the current clip (260 ms); the brand underline
-                  thickens and lights (320 ms).
+     clips        background brightens on hover and for the current clip (260 ms). Hover a clip with a logo:
+                  it goes solid in its brand colour (100 %), the brand's other clips take 25 %, every other clip
+                  fades to 65 %. Hover a repeat clip (no logo): it takes 50 %, the others of the brand 25 % (the
+                  logo clip included), the rest fade. Hover a clip with no brand (personal, title card): no
+                  colour, the others fade the same way. All 320 ms on the master curve; on IKEA yellow the logo
+                  turns dark; the label is black.
      controls     pause and sound are 40 px round icon buttons on a black blur; sound fades in or out over ≈ 0.4 s.
    Scripted demo (board "replay"): plays 4 s, then clicks Telekom, Red Bull and the personal clip.
    After one pass the reel holds on its last frame, paused, until the viewer acts (space toggles too, unless a control has focus).
@@ -69,7 +72,7 @@ Pf.define({
   /* ────────────────────────────────────────────────────────────────────────
      H2 · frames on approach
 
-     At rest the timeline is only the white logos and the brand underlines on black (and the playhead): the work above has
+     At rest the timeline is only the white logos on black (and the playhead): the work above has
      the stage to itself. As the pointer comes down towards the timeline the frame strips fade up
      underneath the logos; moving away lets them sink back.
      Timing at 1×:

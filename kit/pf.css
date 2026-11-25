@@ -68,20 +68,13 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 .clip .logo{position:relative;display:block;width:auto;opacity:.92;filter:drop-shadow(0 1px 6px rgba(0,0,0,.45));transition:opacity 260ms var(--soft)}
 .clip:hover .logo,.clip.on .logo{opacity:1}
 .clip.personal,.clip.card{box-shadow:inset 0 0 0 1px var(--edge)}
-/* brand: later clips of a brand carry a faint underline; every brand clip takes its colour on hover */
-.clip::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:var(--brand,transparent);opacity:0;transform-origin:50% 100%;transition:opacity 320ms var(--soft),transform 320ms var(--soft);pointer-events:none}
-.clip.rep::after{opacity:.55}
-.clip:hover::after,.clip.hov::after{opacity:1;transform:scaleY(1.75)}
-.clip[style*="--brand"]:hover,.clip[style*="--brand"].hov{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--brand) 70%,transparent)}
-.clip[style*="--brand"]:hover .strip,.clip[style*="--brand"].hov .strip{filter:brightness(.56) saturate(1)}   /* unnamed, but present at rest */
 .clip.personal .strip{filter:brightness(.3) saturate(.75)}
 .clip.personal:hover .strip{filter:brightness(.42) saturate(.9)}
 .clip.personal.on .strip{filter:brightness(.38) saturate(.9)}
 .clip.card .strip{filter:brightness(.55)}
 /* the hover label above a clip */
-.tip{position:absolute;bottom:calc(100% + 10px);left:0;transform:translateX(-50%);padding:6px 10px;border-radius:6px;background:rgba(244,242,238,.94);color:#0a0a0b;font:500 11px/1 var(--sans);white-space:nowrap;pointer-events:none;opacity:0;z-index:4}
+.tip{position:absolute;bottom:calc(100% + 10px);left:0;transform:translateX(-50%);padding:6px 10px;border-radius:6px;background:rgba(0,0,0,.78);color:var(--ink);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);box-shadow:inset 0 0 0 1px rgba(244,242,238,.12);font:500 11px/1 var(--sans);white-space:nowrap;pointer-events:none;opacity:0;z-index:4}
 .tip i{font-style:normal;opacity:.68;margin-left:6px}
-.tip::after{content:"";position:absolute;left:10px;right:10px;bottom:-4px;height:2px;border-radius:1px;background:var(--brand,transparent)}
 .head{position:absolute;top:-6px;bottom:-6px;width:1px;margin-left:-.5px;background:var(--head);pointer-events:none;will-change:transform;z-index:3;box-shadow:0 0 8px rgba(244,242,238,.35)}
 
 
@@ -95,3 +88,16 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 .clip.hov .strip{filter:brightness(.5) saturate(.95)}
 .clip.hov .logo{opacity:1}
 .clip.personal.hov .strip{filter:brightness(.42) saturate(.9)}
+
+/* brand focus: nothing at rest. Hovering (or keyboard-focusing) a clip: kit/pf.js sets .hv on it, .full / .half when it has a brand
+   (.full = the clip that carries the logo, .half = a repeat clip), .kin on that brand's other clips and .dim on everything else.
+   The hovered clip with the logo goes solid in its brand colour (100 %), a repeat clip 50 %, the brand's other clips 25 %, the rest
+   fade to 65 %. A clip with no brand (personal, title card) fades the others the same way, with no colour. */
+.clip{isolation:isolate;transition:opacity 320ms var(--soft)}
+.clip::after{content:"";position:absolute;inset:0;z-index:0;background:var(--brand,transparent);opacity:0;transition:opacity 320ms var(--soft);pointer-events:none}
+.clip.full::after{opacity:1}
+.clip.half::after{opacity:.5}
+.clip.kin::after{opacity:.25}
+.clip.dim{opacity:.65}
+.clip .logo{z-index:1;transition:opacity 260ms var(--soft),filter 320ms var(--soft)}
+.clip[data-brand="ikea"].full .logo{filter:brightness(0);opacity:.92}   /* IKEA yellow: the mark turns dark so it stays readable */
