@@ -37,8 +37,8 @@ window.BOARD = {
       note: 'Two ways to open a case study from a logo, and the case study itself with the timeline at the top as its section navigation (IKEA as the example).',
       page: 'case.html',
       items: [
-        { id: 'T1', moment: true, title: 'the reel becomes the hero', said: 'click a logo · the film settles into the hero', why: 'No cut: what you were watching is what you open · the hero keeps the reel’s aspect, which limits art direction at the top.' },
-        { id: 'T2', moment: true, title: 'zoom into the clip', said: 'click a logo · the timeline zooms into its sections', why: 'Makes the structure explicit: a project is a stretch of the career, seen up close · the longest move (3 s), with a beat of dark stage.' },
+        { id: 'T1', moment: true, title: 'the reel becomes the hero', said: 'click a logo · the film settles into the hero', why: 'No cut, and the caption becomes the title · the hero keeps the reel’s aspect, which limits art direction at the top.' },
+        { id: 'T2', moment: true, title: 'zoom into the clip', said: 'click a logo · the timeline zooms into its sections', why: 'Makes the structure explicit: a project is a stretch of the career, seen up close · the longest move (2.2 s); the reel steps back to 25 % while the strip performs.' },
         { id: 'C1', moment: true, title: 'timeline as section navigation', said: 'sections on the timeline · playhead follows the scroll', why: 'One navigation for the whole site: where you are in the story and in the career · a lot to carry in 48 px.' }
       ]
     },
@@ -47,8 +47,8 @@ window.BOARD = {
       note: 'The lower third that names what plays, and the first three seconds of the site.',
       page: 'caption.html',
       items: [
-        { id: 'K1', moment: true, title: 'caption as a lower third', said: 'white logo · project · role, each on its own beat', why: 'The logo is recognised before it is read; the second line names the film you see · logos of different shapes need their own sizes.' },
-        { id: 'I1', moment: true, page: 'arrive.html', title: 'first load as one gesture', said: 'name settles · clips draw in · film fades up · playhead starts', why: 'Teaches the layout in reading order (who, the career, the work) · delays the first film by about 1.6 s; return visits need a skip.' }
+        { id: 'K1', moment: true, title: 'caption as a lower third', said: 'white logo · the cut wipes the project line', why: 'The logo is recognised before it is read, and every cut names the film · logos of different shapes need per-logo sizing.' },
+        { id: 'I1', moment: true, page: 'arrive.html', title: 'first load as one gesture', said: 'name settles · clips draw in · film fades up · playhead starts', why: 'Teaches the layout in reading order (who, the career, the work) · delays the first film by about 1.1 s; return visits need a skip.' }
       ]
     }
   ]

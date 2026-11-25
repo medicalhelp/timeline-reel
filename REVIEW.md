@@ -69,3 +69,25 @@ Light mode: one build, one review by two lenses (motion; clarity and accessibili
 - Tooltip secondary text slightly low (opacity .68).
 
 **Nice**: a one-time "drag to scrub" hint (only if it stays minimal); one tab stop for the timeline with roving focus; real `mailto:` and CV links in the mockups; avoid "a1" in titles; T2 dark beat (also motion); consistent wording ("CV", one term for personal).
+
+## Result of the fix pass (2026-11-25)
+
+All musts and shoulds were applied (per the rulings), most nices too. Re-measured by the builder:
+
+| Break | Before | After |
+|---|---|---|
+| T1 hero | 60 px jump, then reversed | no reversals, ≤ 11 px per frame, ends at scale 0.86 |
+| T2 zoom | overshoot (L 315 → 5 → 29, R 631 → 1333 → 1281) | monotonic (L 316 → 59, R 631 → 1191) |
+| C1 playhead at a step | 696 px in one frame | no reversals, soft 1.4 s curve |
+| C1 hero whip | ≈ 1,740 px in 0.9 s | no movement while visible (fade, reset, fade in) |
+| S1 grab and settle | jump to pointer, 0.6 s stall | soft start, lands on Red Bull's first frame |
+| S2 resting preview | 0.5 s stutter loop | plays forward, no backward jumps |
+| K1 caption | old and new line in one cell | at most one line visible per cell |
+
+Contrast over the brightest frames: name 13.5:1, role 6.8:1, nav 7.6:1, caption 6.7–12.1:1, pause and sound 5.1:1.
+
+**Not done:** interruptible open and close; a wheel interrupt during a C1 step; a drag-to-scrub hint (ruled out); one tab stop for the timeline; a real CV link.
+
+**Open for the owner:** how Home opens a case study (click opens or click jumps); the hold on the last frame after one pass in H1; the lower-left scrim reads as a dark vignette over very light footage (the price of AA with these stand-ins); project titles are placeholders.
+
+Orchestrator check: all 10 explorations load the right screen and play to the end with zero console errors (Chromium, 1440 × 900).
