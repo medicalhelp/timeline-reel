@@ -2,7 +2,7 @@
 
 **app:** design portfolio (new, not part of the collection)
 **status:** idea · **added:** 2026-11-24 · **stage:** grilling
-**Why it lives here:** this repo is where ideas go for now. Linked from `docs/IDEAS.md` ("Other projects").
+**Where it lives:** `medicalhelp/timeline-reel` (moved from the collection repo on 2026-11-25, with its history; the collection's `docs/IDEAS.md` keeps a pointer).
 
 ---
 
@@ -44,13 +44,13 @@ A product design portfolio built like a video editor's timeline.
 14. **No films yet.** For the explorations, use recordings of real work as stand-ins (the collection prototype, the assistant explorations).
 15. **Next: an exploration board in light mode** (the `design-explorations` method): about 10 live desktop mockups, one builder, one review.
 16. **Look to start from:** dark, cinematic, quiet type, like a screening room. A near-black stage so the films glow, white logos, small precise type.
-17. **Where:** `docs/design/portfolio/` in this repo for now, moving out later.
+17. **Where:** first `docs/design/portfolio/` in the collection repo; since 2026-11-25 its own repository, `medicalhelp/timeline-reel`.
 
 **Round 1 feedback on H1 (2026-11-24)**
 18. **Frames on the timeline:** each clip is a film strip of frames from its own film (like an editor), dimmed, with the logo in white on top.
 19. **Fewer, longer clips:** one long clip per company, in order **IKEA, Telekom, Red Bull** (oldest first), about 20–30 s each, made of several films; the projects inside become the case study's sections.
 20. **Personal projects:** the recipe app and the collection, unnamed on the timeline (hover names them), placed by date (both 2026, so after the companies). The collection clip shows several assistant explorations full screen, one after another.
-21. **Logos:** IKEA, Telekom and Red Bull from Wikimedia Commons, converted to white SVGs (`docs/design/portfolio/media/logos-*.svg`).
+21. **Logos:** IKEA, Telekom and Red Bull from Wikimedia Commons, converted to white SVGs (`media/logos-*.svg`).
 
 22. **Minimal timeline:** no time indicators at all, neither a ruler on the timeline nor a timecode at the playhead; the playhead is a single thin line with no handle. Everything focuses on the work.
 

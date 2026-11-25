@@ -1,9 +1,9 @@
 # Brief: the portfolio as a timeline reel
 
 **Date:** 2026-11-24 · **Owner:** Johannes · **Built by:** Claude with the `design-explorations` method, **light mode** (one builder, one review by both lenses)
-**Idea and decisions:** `docs/ideas/portfolio-timeline.md` (the grill). This brief turns them into a round of explorations.
-**Output:** `docs/design/portfolio/`: `board.html` (desktop frames), one page per cluster with `?screen=ID`, `kit/`, `media/` (stand-in films), `research/`.
-**Ships to:** branch `claude/determined-dirac-b6sucm`; Johannes reviews the board first.
+**Idea and decisions:** `docs/IDEA.md` (the grill). This brief turns them into a round of explorations.
+**Output:** the repo root: `board.html` (desktop frames), one page per cluster with `?screen=ID`, `kit/`, `media/` (stand-in films), `research/`.
+**Ships to:** this repository (`medicalhelp/timeline-reel`, moved from the collection repo on 2026-11-25); Johannes reviews the board first.
 
 ## 1. The problem
 A product design portfolio has to make sense to a hiring manager in about 30 seconds, and most look the same: a grid of thumbnails. The work is motion and interaction, so the portfolio should show it moving, and its structure should be the career itself.
@@ -61,4 +61,4 @@ _Updated after H1 feedback: five clips (IKEA, Telekom, Red Bull, then the recipe
 Mobile; real project content; real logos; sound design; the full case study text.
 
 ## 7. References
-`docs/ideas/portfolio-timeline.md` · https://www.jonway.studio/ · `the-archive/index.html` and `CONCEPT.md` (master curve, one timeline, Resolve-style timeline UI) · `research/smooth-motion.md` · the assistant explorations (`docs/design/assistant/`), whose kit pattern (`?screen=ID`, one timing path, replay) this round reuses.
+`docs/IDEA.md` · https://www.jonway.studio/ · `the-archive/index.html` and `CONCEPT.md` (master curve, one timeline, Resolve-style timeline UI) · `research/smooth-motion.md` · the assistant explorations (`docs/design/assistant/`), whose kit pattern (`?screen=ID`, one timing path, replay) this round reuses.

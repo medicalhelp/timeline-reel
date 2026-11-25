@@ -1,6 +1,6 @@
 # Portfolio kit: how to build an exploration
 
-Read `../BRIEF.md`, then `../home.html` (H1, the reference), then `../research/smooth-motion.md`. Each cluster is one page in `docs/design/portfolio/`; each exploration is opened with `?screen=ID` and is one desktop screen (1440 × 900, shown at half size on the board).
+Read `../BRIEF.md`, then `../home.html` (H1, the reference), then `../research/smooth-motion.md`. Each cluster is one page at the repo root; each exploration is opened with `?screen=ID` and is one desktop screen (1440 × 900, shown at half size on the board).
 
 ## Skeleton
 
