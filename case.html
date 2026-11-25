@@ -11,51 +11,55 @@
    case study's sections from a camera (clip boxes → clip-path, frames → translateX, nothing scales). */
 .case .reel{transform-origin:0 0;will-change:transform,opacity}
 .case .reel::after{opacity:var(--grad,1)}
-.case .tl{will-change:transform}
-.case.cs .chrome,.case.cs .cap,.case.cs .snd,.case.busy .chrome,.case.busy .snd{pointer-events:none}
+.case .tl{background:none;will-change:transform}             /* the strip floats as it travels; a backdrop fades in once it lands */
+.case .ctls,.case .cap{will-change:transform,opacity}
+.cs-top{position:absolute;left:0;right:0;top:0;z-index:5;background:var(--stage);opacity:0;pointer-events:none}
 
 .cs-strip{position:absolute;left:36px;right:36px;top:50%;height:48px;margin-top:-24px;opacity:0;pointer-events:none}
-.case.cs .cs-strip{pointer-events:auto;cursor:pointer}
 .ss{position:absolute;left:0;top:0;width:100%;height:100%}
-.ss i{position:absolute;left:0;top:0;height:100%;background-repeat:no-repeat;will-change:transform,opacity}
+.ss i{position:absolute;left:0;top:0;height:100%;background-repeat:no-repeat;will-change:transform,opacity;filter:saturate(.35)}
 .ss b{position:absolute;inset:0;background:#000;opacity:.62;transition:opacity 320ms var(--soft)}
-.cs-logo{position:absolute;left:0;top:50%;width:auto;pointer-events:none;filter:drop-shadow(0 1px 6px rgba(0,0,0,.45))}
-.cs-lab{position:absolute;left:0;top:50%;font:500 11px/1 var(--sans);letter-spacing:.02em;color:var(--ink);white-space:nowrap;pointer-events:none;text-shadow:0 1px 8px rgba(0,0,0,.6)}
+.cs-logo,.cs-mini{position:absolute;left:0;top:50%;width:auto;pointer-events:none;filter:drop-shadow(0 1px 6px rgba(0,0,0,.45))}
+.cs-lab{position:absolute;left:0;top:50%;font:500 11px/1 var(--sans);letter-spacing:.02em;color:var(--ink);white-space:nowrap;pointer-events:none;text-shadow:0 1px 8px rgba(0,0,0,.8)}
 .cs-head{position:absolute;top:-6px;bottom:-6px;left:0;width:1px;margin-left:-.5px;background:var(--head);box-shadow:0 0 8px rgba(244,242,238,.35);opacity:0;pointer-events:none;will-change:transform}
-.cs-tip{position:absolute;top:calc(100% + 10px);left:0;padding:6px 10px;border-radius:6px;background:rgba(244,242,238,.94);color:#0a0a0b;font:500 11px/1 var(--sans);white-space:nowrap;pointer-events:none;opacity:0;transform:translateX(-50%)}
-.cs-tip i{font-style:normal;opacity:.55;margin-left:6px}
+.cs-ind{position:absolute;left:0;top:calc(100% + 5px);width:100px;height:2px;border-radius:1px;background:var(--ink);transform-origin:0 0;opacity:0;pointer-events:none;will-change:transform}
+.cs-tip{position:absolute;top:calc(100% + 14px);left:0;padding:6px 10px;border-radius:6px;background:rgba(244,242,238,.94);color:#0a0a0b;font:500 11px/1 var(--sans);white-space:nowrap;pointer-events:none;opacity:0;transform:translateX(-50%)}
+.cs-tip i{font-style:normal;opacity:.68;margin-left:6px}
+.cs-nav{position:absolute;left:36px;right:36px;top:50%;height:48px;margin-top:-24px}
+.cs-nav button{position:absolute;top:0;height:100%;border-radius:4px}
+.cs-nav button:focus-visible{outline:none;box-shadow:inset 0 0 0 2px var(--ink)}
 
 /* the page below the hero */
 .cs{position:absolute;inset:0;z-index:4;overflow:hidden;pointer-events:none}
-.cs-in{position:absolute;left:0;right:0;top:0;padding:0 36px;opacity:0;will-change:transform,opacity}
+.cs-in{position:absolute;left:0;right:0;top:0;will-change:transform}
 .cs-in button{pointer-events:auto}
-.ttl{display:grid;grid-template-columns:1fr 420px;column-gap:96px;align-items:end}
+.ttl{display:grid;grid-template-columns:1fr 400px;column-gap:80px;align-items:end}
 .tline{display:block;overflow:hidden}
 .tline>span{display:block;will-change:transform,opacity}
 .tline.t1{height:34px;display:flex;align-items:flex-end}
 .tline.t1 img{display:block;width:auto}
-.tline.t1 .tag,.sl{font:600 11px/1 var(--sans);letter-spacing:.16em;text-transform:uppercase;color:var(--ink-2)}
-.tline.t2{margin-top:12px;font:400 56px/1.06 var(--serif);letter-spacing:-.018em;padding-bottom:.06em}
-.tline.t3{margin-top:10px;font-size:12px;color:var(--ink-2)}
-.tline.t3 i,.sl span{font-style:normal;color:var(--ink-2);margin-right:10px}
-.tline.t3 i{margin:0 8px}
-.intro{font-size:15px;line-height:1.55;color:var(--ink-2);margin:0}
-.ph{display:inline-block;margin-left:12px;font:500 9.5px/1 var(--mono);letter-spacing:.04em;text-transform:none;color:var(--ink-2);opacity:.8}
-.back{margin-top:18px;font-size:12px;color:var(--ink-2);border-bottom:1px solid var(--ink-4);padding-bottom:3px}
+.tline.t1 .tag,.sl{font:600 11px/1 var(--sans);letter-spacing:.16em;text-transform:uppercase;color:var(--ink-2o)}
+h1.tline{margin:10px 0 0;font:400 44px/1 var(--serif);letter-spacing:-.015em}   /* the same metrics as the caption's title, so it can become it */
+.tline.t3{margin-top:12px;font-size:12px;color:var(--ink-2o)}
+.tline.t3 i{font-style:normal;color:var(--ink-2o);margin:0 8px}
+.sl span{color:var(--ink-2o);margin-right:10px}
+.intro{font-size:15px;line-height:1.55;color:var(--ink-2o);margin:0}
+.ph{display:inline-block;margin-left:12px;font:500 9.5px/1 var(--mono);letter-spacing:.04em;text-transform:none;color:var(--ink-2o)}
+.back{margin-top:18px;font-size:12px;color:var(--ink-2o);border-bottom:1px solid var(--ink-4);padding-bottom:3px}
 .back:hover{color:var(--ink)}
-.sec{display:grid;grid-template-columns:400px 1fr;column-gap:96px;padding-top:150px;align-items:start}
+.sec{display:grid;grid-template-columns:360px 1fr;column-gap:80px;padding-top:150px;align-items:start}
 .sec.wide{grid-template-columns:1fr}
 .sec h2{margin:18px 0 0;font:400 40px/1.08 var(--serif);letter-spacing:-.015em}
-.sec p{margin:16px 0 0;font-size:15px;line-height:1.55;color:var(--ink-2);max-width:400px}
-.sec.wide .txt{display:grid;grid-template-columns:400px 1fr;column-gap:96px;align-items:end}
+.sec p{margin:16px 0 0;font-size:15px;line-height:1.55;color:var(--ink-2o);max-width:360px}
+.sec.wide .txt{display:grid;grid-template-columns:360px 1fr;column-gap:80px;align-items:end}
 .sec.wide .txt p{margin:0}
 .med{display:flex;gap:24px;flex-wrap:wrap}
 .sec.wide .med{margin-top:40px}
 .vis{position:relative;overflow:hidden;border-radius:4px;background:#000;clip-path:inset(100% 0 0 0)}
 .vis video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;will-change:transform}
-.sheet{display:grid;grid-template-columns:repeat(6,128px);gap:8px;background:none}
+.sheet{display:grid;grid-template-columns:repeat(5,128px);gap:8px;background:none}
 .sheet i{display:block;width:128px;height:72px;border-radius:2px;background-repeat:no-repeat}
-.foot{display:flex;justify-content:space-between;align-items:flex-end;padding:180px 0 220px;border-bottom:0}
+.foot{display:flex;justify-content:space-between;align-items:flex-end;padding:180px 0 220px}
 .foot .sl{margin-bottom:12px}
 .next{font:400 56px/1 var(--serif);letter-spacing:-.018em;text-align:left}
 .next:hover{opacity:.8}
@@ -72,7 +76,7 @@ const COPY = [
   ['The details that carry it.', 'The design as it shipped: the key screens and the motion between them.'],
   ['What changed afterwards.', 'The outcome in plain terms; numbers only where they are real.']
 ];
-const TLOGO = { ikea: 22, telekom: 32, redbull: 26 };
+const TLOGO = { ikea: 22, telekom: 32, redbull: 26 }, MLOGO = { ikea: 8, telekom: 13, redbull: 9 };
 const damp = (a, b, lam, dt) => b + (a - b) * Math.exp(-lam * dt);
 const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
 const lerp = (a, b, e) => a + (b - a) * e;
@@ -82,11 +86,19 @@ function makeCase(ctx) {
   const { root, S, PROJECTS, TOTAL, EASE } = ctx, N = PROJECTS.length;
   const soft = x => EASE.soft(clamp(x)), arrive = x => EASE.arrive(clamp(x));
   root.classList.add('case');
-  const tl = ctx.$('#tl'), reel = ctx.$('#reel'), track = ctx.track, chrome = ctx.$('.chrome'), cap = ctx.$('#cap'), snd = ctx.$('#snd');
+  const tl = ctx.$('#tl'), reel = ctx.$('#reel'), track = ctx.track, chrome = ctx.$('.chrome'), cap = ctx.$('#cap'), ctls = ctx.$('#ctls');
   const vw = innerWidth, vh = innerHeight, PAD = 36, tlH = vh * .1, reelH = vh * .9, W = track.clientWidth, TH = 48, FW = Math.round(TH * 16 / 9), K = 4, LINE = vh * .3;
+  const nameOf = p => p.kind === 'work' ? p.co : p.name;
 
-  /* ── the strip: per clip five section groups of K frame tiles, a logo, five labels ── */
-  let h = '<div class="cs-strip">';
+  /* geometry of the case study: compact chrome on top, the bar under it, the hero, the page */
+  const barTop = 62, s1 = .86, CW = Math.round(vw * s1), CL = (vw - CW) / 2;
+  const heroTop = barTop + tlH + 22, heroH = 540, c1 = (reelH * s1 - heroH) / 2 / s1, ty1 = heroTop - c1 * s1;
+  root.insertAdjacentHTML('beforeend', '');
+  reel.insertAdjacentHTML('afterend', `<div class="cs-top" style="height:${barTop + tlH}px" aria-hidden="true"></div>`);
+  const csTop = ctx.$('.cs-top');
+
+  /* ── the strip: per clip five section groups of K frame tiles, a logo, a small logo, five labels ── */
+  let h = '<div class="cs-strip" aria-hidden="true">';
   PROJECTS.forEach((p, c) => {
     for (let s = 0; s < 5; s++) {
       h += `<div class="ss">`;
@@ -96,20 +108,20 @@ function makeCase(ctx) {
       }
       h += '<b></b></div>';
     }
-    if (p.kind === 'work') h += `<img class="cs-logo" src="media/logos-${p.logo}.svg" alt="" style="height:${Pf.LOGO[p.logo].h}px">`; else h += '<span class="cs-logo"></span>';
+    h += p.kind === 'work' ? `<img class="cs-logo" src="media/logos-${p.logo}.svg" alt="" style="height:${Pf.LOGO[p.logo].h}px"><img class="cs-mini" src="media/logos-${p.logo}.svg" alt="" style="height:${MLOGO[p.logo]}px">` : '<span class="cs-logo"></span><span class="cs-mini"></span>';
     SECS.forEach(n => h += `<span class="cs-lab">${n}</span>`);
   });
-  h += '<div class="cs-head"></div><div class="cs-tip"></div></div>';
+  h += '<div class="cs-ind"></div><div class="cs-head"></div><div class="cs-tip"></div></div><nav class="cs-nav" aria-label="case study sections and neighbouring work" inert></nav>';
   tl.insertAdjacentHTML('beforeend', h);
-  const strip = ctx.$('.cs-strip'), sHead = ctx.$('.cs-head'), sTip = ctx.$('.cs-tip');
+  const strip = ctx.$('.cs-strip'), sHead = ctx.$('.cs-head'), sTip = ctx.$('.cs-tip'), sInd = ctx.$('.cs-ind'), nav = ctx.$('.cs-nav');
   const SS = PROJECTS.map((p, c) => [...strip.querySelectorAll('.ss')].slice(c * 5, c * 5 + 5).map(el => ({ el, tiles: [...el.querySelectorAll('i')], veil: el.querySelector('b') })));
-  const LOGOS = [...strip.querySelectorAll('.cs-logo')], LABS = PROJECTS.map((p, c) => [...strip.querySelectorAll('.cs-lab')].slice(c * 5, c * 5 + 5));
+  const LOGOS = [...strip.querySelectorAll('.cs-logo')], MINIS = [...strip.querySelectorAll('.cs-mini')], LABS = PROJECTS.map((p, c) => [...strip.querySelectorAll('.cs-lab')].slice(c * 5, c * 5 + 5));
   const LEV = [99, 0, 1, 0];                                        // tile level in the binary hierarchy (j = 0 always shows)
 
   /* layouts: each returns one [left, right] box per clip, in strip px */
   const boxCam = (cen, z) => PROJECTS.map(p => { const L = (p.start - cen) * z + W / 2; return [L, L + Math.max(2, p.len * z - 3)]; });
   const boxH1 = () => boxCam(TOTAL / 2, W / TOTAL);                // identical to the kit's timeline
-  const SW = 26, G = 3;
+  const SW = 56, G = 3;                                             // neighbours: wide enough for a small logo
   const boxCS = i => { const TL = i * (SW + G), TR = W - (N - 1 - i) * (SW + G);
     return PROJECTS.map((p, c) => c < i ? [c * (SW + G), c * (SW + G) + SW] : c > i ? [TR + G + (c - i - 1) * (SW + G), TR + G + (c - i - 1) * (SW + G) + SW] : [TL, TR]); };
   const mix = (A, B, e) => A.map((a, c) => [lerp(a[0], B[c][0], e), lerp(a[1], B[c][1], e)]);
@@ -130,59 +142,69 @@ function makeCase(ctx) {
         LABS[c][s].style.opacity = la.toFixed(3);
         if (la > 0) LABS[c][s].style.transform = `translate(${((a + b) / 2).toFixed(2)}px,0) translate(-50%,-50%)`;
       }
-      const [L, R] = B[c], la = logoA[c] * clamp((R - L - 70) / 50);
-      LOGOS[c].style.opacity = la.toFixed(3);
-      LOGOS[c].style.transform = `translate(${((L + R) / 2).toFixed(2)}px,0) translate(-50%,-50%)`;
+      const [L, R] = B[c], w = R - L, edge = clamp((Math.min(L, W - R) + 24) / 24), la = edge * logoA[c] * clamp((w - 70) / 50), ma = edge * logoA[c] * clamp((w - 36) / 12) * clamp((110 - w) / 30);   // logos fade as their clip leaves the strip
+      LOGOS[c].style.opacity = la.toFixed(3); MINIS[c].style.opacity = ma.toFixed(3);
+      const tx = `translate(${((L + R) / 2).toFixed(2)}px,0) translate(-50%,-50%)`; LOGOS[c].style.transform = tx; MINIS[c].style.transform = tx;
     });
   }
 
   /* ── the hero: the reel itself, moved and clipped into the hero frame (log-space scale) ── */
-  const s1 = (vw - 2 * PAD) / vw, heroTop = tlH + 22, heroH = Math.round(vh * .64), c1 = (reelH * s1 - heroH) / 2 / s1, ty1 = heroTop - c1 * s1;
   function hero(e, off) {
     if (e <= 0 && Math.abs(off) < .01) { reel.style.transform = ''; reel.style.clipPath = ''; reel.style.removeProperty('--grad'); return; }
     const s = Math.exp(Math.log(s1) * e), c = c1 * e;
-    reel.style.transform = `translate(${(PAD * e).toFixed(2)}px,${(ty1 * e + off).toFixed(2)}px) scale(${s.toFixed(5)})`;
+    reel.style.transform = `translate(${(CL * e).toFixed(2)}px,${(ty1 * e + off).toFixed(2)}px) scale(${s.toFixed(5)})`;
     reel.style.clipPath = `inset(${c.toFixed(2)}px 0 ${c.toFixed(2)}px 0 round ${(6 * e / s).toFixed(2)}px)`;
     reel.style.setProperty('--grad', (1 - .72 * e).toFixed(3));
   }
+  // the pause and sound controls travel from the lower right into the compact chrome, beside the contact links
+  let ctlD = null;
+  const ctlPos = e => { if (!ctlD) { const a = ctls.getBoundingClientRect(), n = ctx.$('.nav').getBoundingClientRect(); ctlD = [n.left - 32 - a.right, n.top + n.height / 2 - (a.top + a.height / 2)]; }
+    ctls.style.transform = e <= 0 ? '' : `translate(${(ctlD[0] * e).toFixed(2)}px,${(ctlD[1] * e).toFixed(2)}px)`; };
+  const bar = e => { tl.style.transform = e <= 0 ? '' : `translateY(${(-(reelH - barTop) * e).toFixed(2)}px)`; };
 
   /* ── the page ── */
-  root.insertAdjacentHTML('beforeend', '<div class="cs"><div class="cs-in"></div></div>');
-  const csIn = ctx.$('.cs-in');
-  let tops = [0, 0, 0, 0, 0], pageH = vh, maxY = 0, vis = [];
+  root.insertAdjacentHTML('beforeend', '<div class="cs" inert><div class="cs-in"></div></div>');
+  const cs = ctx.$('.cs'), csIn = ctx.$('.cs-in');
+  let tops = [0, 0, 0, 0, 0], pageH = vh, maxY = 0, vis = [], ttl = null, rest = null;
   function vid(film, from, w, hh) { return `<div class="vis" style="width:${w}px;height:${hh}px"><video muted loop playsinline preload="auto" data-film="${film}" data-from="${from}"></video></div>`; }
   function build(i) {
-    const p = PROJECTS[i], sg = k => p.segs[k % p.segs.length], nx = PROJECTS[i + 1];
+    const p = PROJECTS[i], sg = k => p.segs[k % p.segs.length], nx = PROJECTS[i + 1], MW = CW - 440, R3 = Math.floor((CW - 48) / 3), R2 = Math.floor((MW - 24) / 2);
     let sheet = '<div class="vis sheet">';
-    for (let k = 0; k < 18; k++) {
-      const g = sg(k), n = Math.ceil(18 / p.segs.length), ft = g.from + ((Math.floor(k / p.segs.length) + .5) / n) * g.len, NF = Math.ceil(Pf.FDUR[g.film] * Pf.SPF), idx = Math.min(NF - 1, Math.floor(ft * Pf.SPF));
+    for (let k = 0; k < 15; k++) {
+      const g = sg(k), n = Math.ceil(15 / p.segs.length), ft = g.from + ((Math.floor(k / p.segs.length) + .5) / n) * g.len, NF = Math.ceil(Pf.FDUR[g.film] * Pf.SPF), idx = Math.min(NF - 1, Math.floor(ft * Pf.SPF));
       sheet += `<i style="background-image:url('media/strip-${g.film}.jpg');background-size:${NF * 128}px 72px;background-position:${-idx * 128}px 0"></i>`;
     }
     sheet += '</div>';
     const med = [
-      vid(sg(0).film, sg(0).from + 1, 872, 490), sheet,
-      [1, 2, 3].map(k => vid(sg(k).film, sg(k).from + .8, 440, 248)).join(''),
-      vid(sg(2).film, sg(2).from + 2, 872, 490),
-      vid(sg(3).film, sg(3).from + 1, 424, 239) + vid(sg(1).film, sg(1).from + 3, 424, 239)
+      vid(sg(0).film, sg(0).from + 1, MW, Math.round(MW * 9 / 16)), sheet,
+      [1, 2, 3].map(k => vid(sg(k).film, sg(k).from + .8, R3, Math.round(R3 * 9 / 16))).join(''),
+      vid(sg(2).film, sg(2).from + 2, MW, Math.round(MW * 9 / 16)),
+      vid(sg(3).film, sg(3).from + 1, R2, Math.round(R2 * 9 / 16)) + vid(sg(1).film, sg(1).from + 3, R2, Math.round(R2 * 9 / 16))
     ];
-    const t1 = p.kind === 'work' ? `<img src="media/logos-${p.logo}.svg" alt="${Pf.esc(p.co)}" style="height:${TLOGO[p.logo]}px">` : '<span class="tag">personal project</span>';
+    const t1 = p.kind === 'work' ? `<img src="media/logos-${p.logo}.svg" alt="${Pf.esc(p.co)}" style="height:${TLOGO[p.logo]}px">` : '<span class="tag">personal</span>';
+    csIn.style.padding = `0 ${CL}px`;
     csIn.innerHTML = `<div style="height:${heroTop + heroH + 36}px"></div>
-      <div class="ttl"><div><span class="tline t1"><span>${t1}</span></span><span class="tline t2"><span>${Pf.esc(p.kind === 'work' ? p.pr : p.name)}</span></span><span class="tline t3"><span>${Pf.esc(p.role)}<i>·</i>${Pf.esc(p.yr)}</span></span></div>
-        <div><p class="intro">A two-line summary of the engagement: the team, the scope, and the part that was mine.<span class="ph">placeholder copy</span></p><button class="back" type="button">back to the reel</button></div></div>
-      ${SECS.map((n, k) => `<section class="sec${k === 2 ? ' wide' : ''}" data-k="${k}"><div class="txt"><div><div class="sl"><span>0${k + 1}</span>${n}<em class="ph">placeholder copy</em></div><h2>${COPY[k][0]}</h2></div><p>${COPY[k][1]}</p></div><div class="med">${med[k]}</div></section>`).join('')}
-      <div class="foot"><div><div class="sl">${nx ? 'next' : 'end of the reel'}</div><button class="next" type="button">${nx ? Pf.esc(nx.kind === 'work' ? nx.co : nx.name) : 'back to the reel'}</button></div></div>`;
+      <div class="ttl"><div><span class="tline t1"><span>${t1}</span></span><h1 class="tline t2"><span>${Pf.esc(p.pr)}</span></h1><span class="tline t3"><span>${Pf.esc(p.role)}<i>·</i>${Pf.esc(p.yr)}</span></span></div>
+        <div class="ttr"><p class="intro">A two-line summary of the engagement: the team, the scope, and the part that was mine.<span class="ph">placeholder copy</span></p><button class="back" type="button">back to the reel</button></div></div>
+      <div class="rest">
+      ${SECS.map((n, k) => `<section class="sec${k === 2 ? ' wide' : ''}" data-k="${k}" aria-labelledby="sec-${k}"><div class="txt"><div><div class="sl"><span>0${k + 1}</span>${n}<em class="ph">placeholder copy</em></div><h2 id="sec-${k}">${COPY[k][0]}</h2></div><p>${COPY[k][1]}</p></div><div class="med" aria-hidden="true">${med[k]}</div></section>`).join('')}
+      <div class="foot"><div><div class="sl">${nx ? 'next' : 'end of the reel'}</div><button class="next" type="button">${nx ? Pf.esc(nameOf(nx)) : 'back to the reel'}</button></div></div></div>`;
     csIn.querySelector('.back').addEventListener('click', () => close());
     csIn.querySelector('.next').addEventListener('click', () => (nx ? step(i + 1) : close()));
+    ttl = csIn.querySelector('.ttl'); rest = csIn.querySelector('.rest');
     vis = [...csIn.querySelectorAll('.vis')].map(el => ({ el, v: el.querySelector('video'), on: false, play: false }));
     vis.forEach(o => { if (o.v) { o.v.src = Pf.film(o.v.dataset.film); o.v.addEventListener('loadedmetadata', () => { try { o.v.currentTime = +o.v.dataset.from; } catch (_) {} }, { once: true }); } });
     tops = [...csIn.querySelectorAll('.sec')].map(s => s.offsetTop); pageH = csIn.offsetHeight; maxY = Math.max(0, pageH - vh);
+    root.setAttribute('aria-label', `${nameOf(p)} case study`);
   }
-  const titles = t => csIn.querySelectorAll('.tline>span').forEach((sp, k) => { const q = arrive((t - .07 * k) / .9); sp.style.transform = q >= 1 ? '' : `translateY(${((1 - q) * 105).toFixed(2)}%)`; sp.style.opacity = q.toFixed(3); });
-  let y = 0, ty = 0, rise = 0, alpha = 0, stw = null;
-  const page = () => { csIn.style.transform = `translateY(${(rise - y).toFixed(2)}px)`; csIn.style.opacity = alpha.toFixed(3); };
+  const lines = () => csIn.querySelectorAll('.tline>span');
+  const titles = t => lines().forEach((sp, k) => { const q = arrive((t - .07 * k) / .9); sp.style.transform = q >= 1 ? '' : `translateY(${((1 - q) * 105).toFixed(2)}%)`; sp.style.opacity = q.toFixed(3); });
+  let y = 0, ty = 0, rise = 0, alpha = 0, tA = 0, stw = null;
+  // the page: scroll moves it; rise and fade apply to the text only (never to the hero)
+  const page = () => { csIn.style.transform = `translateY(${(-y).toFixed(2)}px)`; if (rest) { rest.style.transform = rise ? `translateY(${rise.toFixed(2)}px)` : ''; rest.style.opacity = alpha.toFixed(3); } if (ttl) { ttl.querySelector('.ttr').style.opacity = alpha.toFixed(3); ttl.querySelector('.ttr').style.transform = rise ? `translateY(${rise.toFixed(2)}px)` : ''; } };
 
   /* the playhead follows the scroll: each section's page range maps onto its box, piecewise linearly */
-  let active = -1, hov = null;
+  let active = -1, hov = null, headOver = null, indA = 0, indW = 0, indO = 0;
   function headX() {
     const Ln = y + LINE; let k = 0, q = 0; active = -1;
     if (Ln >= tops[0]) { for (k = 4; k > 0 && Ln < tops[k]; k--); const end = k < 4 ? tops[k + 1] : Math.min(pageH, maxY + LINE); q = clamp((Ln - tops[k]) / Math.max(1, end - tops[k])); active = k; }
@@ -190,133 +212,180 @@ function makeCase(ctx) {
   }
   let veilKey = '';
   function veils() {
-    const key = tgt + ':' + active + ':' + (hov ? hov.join() : '');
+    const key = tgt + ':' + active + ':' + (hov ? hov.join() : '') + ':' + mode;
     if (key === veilKey) return; veilKey = key;
     PROJECTS.forEach((p, c) => SS[c].forEach((o, s) => {
       const isH = hov && hov[0] === c && (c !== tgt || hov[1] === s);
-      o.veil.style.opacity = isH ? .34 : c === tgt && s === active ? .4 : p.kind === 'personal' ? .72 : .62;
+      o.veil.style.opacity = isH ? .34 : c === tgt && s === active ? .44 : p.kind === 'personal' ? .7 : .62;
     }));
+    nav.querySelectorAll('[data-s]').forEach(b => { if (+b.dataset.s === active) b.setAttribute('aria-current', 'true'); else b.removeAttribute('aria-current'); });
   }
+  // real buttons over the strip once it is at rest: five sections, then the neighbours
+  function buildNav() {
+    let html = '';
+    PROJECTS.forEach((p, c) => {
+      if (c === tgt) for (let s = 0; s < 5; s++) { const [a, b] = secBox(B, sig, c, s); html += `<button type="button" data-s="${s}" style="left:${a}px;width:${b - a}px" aria-label="${SECS[s]}, section ${s + 1} of 5"></button>`; }
+      else { const [a, b] = B[c]; html += `<button type="button" data-c="${c}" style="left:${a}px;width:${b - a}px" aria-label="${Pf.esc(nameOf(p))} · open case study"></button>`; }
+    });
+    nav.innerHTML = html;
+    nav.querySelectorAll('button').forEach(btn => {
+      const k = btn.dataset.s !== undefined ? [tgt, +btn.dataset.s] : [+btn.dataset.c, 0];
+      const enter = () => { hov = k; if (k[0] !== tgt) showTip(k[0]); };
+      const leave = () => { hov = null; hideTip(); };
+      btn.addEventListener('mouseenter', enter); btn.addEventListener('mouseleave', leave);
+      btn.addEventListener('focus', () => { if (btn.matches(':focus-visible')) enter(); }); btn.addEventListener('blur', leave);
+      btn.addEventListener('click', () => { if (mode !== 'cs') return; ctx.user(); if (k[0] === tgt) scrollTo(tops[k[1]] - (barTop + tlH + 60)); else step(k[0]); });
+      btn.dataset.hover = '';
+    });
+  }
+  let tipOn = -1;
+  function showTip(c) {
+    const p = PROJECTS[c], [L, R] = B[c];
+    if (tipOn === c) return; tipOn = c;
+    sTip.innerHTML = `${Pf.esc(nameOf(p))}<i>open case study</i>`;
+    const w = sTip.offsetWidth, x = clamp((L + R) / 2, w / 2, W - w / 2);          // never clipped by the viewport
+    sTip.style.left = x + 'px';
+    ctx.anim(sTip, [{ opacity: 0, transform: 'translate(-50%,-6px)' }, { opacity: 1, transform: 'translate(-50%,0)' }], 320, 'arrive');
+  }
+  function hideTip() { if (tipOn >= 0) { tipOn = -1; ctx.anim(sTip, [{ opacity: +getComputedStyle(sTip).opacity }, { opacity: 0 }], 200, 'soft'); } }
 
   /* ── one master timeline per transition: fn(T) writes every value from T ── */
   let mode = 'home', tgt = 0, tr = null, last = performance.now(), fr = 0;
-  const run = (d, fn, end) => { tr = { T: 0, d: ctx.reduced ? Math.min(d, .4) : d, fn, end }; fn(0); };
-  const setOut = o => { chrome.style.opacity = o; snd.style.opacity = o; };
-
-  function enterCS() { mode = 'cs'; root.classList.add('cs'); root.classList.remove('busy'); veilKey = ''; }
+  const run = (d, fn, end) => { tr = { T: 0, d, fn, end }; fn(0); };
+  function layers(inCS) {                                            // inert hidden layers, so focus never lands on what you cannot see
+    cs.inert = !inCS; nav.inert = !inCS; track.inert = inCS; cap.style.visibility = inCS ? 'hidden' : '';
+    if (!inCS) root.removeAttribute('aria-label');
+  }
+  function enterCS() { mode = 'cs'; root.classList.add('in-cs'); veilKey = ''; buildNav(); layers(true); }
   function open(i, how) {
     if (mode !== 'home') return;
-    mode = 'opening'; root.classList.add('busy'); tgt = i; S.holdCap = true;
+    mode = 'opening'; tgt = i; S.holdCap = true; hideTip();
     const p = PROJECTS[i]; if (S.cur !== i) ctx.jump(i); S.range = [p.start, p.start + p.len];
     if (!S.playing && !ctx.reduced) ctx.play();
-    build(i); y = ty = 0; stw = null;
-    const Bcs = boxCS(i), z0 = W / TOTAL, z1 = W / p.len, cA = TOTAL / 2, cB = p.start + p.len / 2;
+    build(i); y = ty = 0; stw = null; cs.inert = false;
+    const Bcs = boxCS(i), z0 = W / TOTAL, z1 = (Bcs[i][1] - Bcs[i][0] + 3) / p.len, cA = TOTAL / 2, cB = p.start - (Bcs[i][0] - W / 2) / z1;
     sig = PROJECTS.map(() => 0); lab = PROJECTS.map(() => 0); logoA = PROJECTS.map(() => 1);
-    if (ctx.reduced) how = 'fade';
+    if (ctx.reduced && how !== 'instant') how = 'fade';
     if (how === 'instant') {
-      hero(1, 0); tl.style.transform = `translateY(${-reelH}px)`; track.style.opacity = 0; strip.style.opacity = 1;
-      B = Bcs; sig[i] = 1; lab[i] = 1; logoA[i] = 0; render(); alpha = 1; rise = 0; page(); titles(9); setOut(0); cap.style.opacity = 0; sHead.style.opacity = 1;
+      hero(1, 0); bar(1); ctlPos(1); csTop.style.opacity = 1; track.style.opacity = 0; strip.style.opacity = 1;
+      B = Bcs; sig[i] = 1; lab[i] = 1; logoA[i] = 0; render(); alpha = 1; rise = 0; page(); titles(9); cap.style.opacity = 0; sHead.style.opacity = 1;
       enterCS(); return;
     }
+    // the caption's title line becomes the case study's h1 (same metrics: it only travels, then the title takes over)
+    const cr = cap.querySelector('.pr').getBoundingClientRect(), hr = ttl.querySelector('h1 span').getBoundingClientRect();
+    const mdx = hr.left - cr.left, mdy = hr.top - cr.top;
     const F = {
-      /* T1: the reel leads into the hero frame, the timeline follows like a crane and re-forms */
+      /* T1: the reel leads into the hero frame, the caption becomes the title, the timeline follows like a crane */
       hero: T => {
-        hero(soft(T / 1.4), rise - y);
-        setOut(1 - soft(T / .4)); cap.style.opacity = 1 - soft(T / .35);
-        tl.style.transform = `translateY(${(-reelH * soft((T - .15) / 1.4)).toFixed(2)}px)`;
+        hero(soft(T / 1.4), -y);
+        const m = soft((T - .1) / 1.4);
+        cap.style.transform = `translate(${(mdx * m).toFixed(2)}px,${(mdy * m).toFixed(2)}px)`;
+        const swap = T >= 1.5;
+        cap.style.opacity = swap ? 0 : 1;
+        cap.querySelector('.co').parentElement.style.opacity = (1 - soft((T - .1) / .5)).toFixed(3);
+        const ls = lines(); ls.forEach((sp, k) => { sp.style.transform = ''; sp.style.opacity = k === 0 ? soft((T - 1.1) / .5).toFixed(3) : swap ? 1 : 0; });
+        ctlPos(soft((T - .1) / 1.4)); bar(soft((T - .2) / 1.4));
         track.style.opacity = 1 - soft((T - .25) / .5);
         B = Bcs; sig[i] = 1; logoA[i] = 0; lab[i] = arrive((T - .9) / .5); render();
         strip.style.opacity = soft((T - .6) / .6); sHead.style.opacity = soft((T - 1.1) / .3);
-        alpha = arrive((T - .5) / .9); rise = 60 * (1 - arrive((T - .5) / 1.1)); page(); titles(T - .6);
+        csTop.style.opacity = soft((T - 1.2) / .4);
+        alpha = arrive((T - .6) / .9); rise = 60 * (1 - arrive((T - .6) / 1.1)); page();
       },
-      /* T2: a camera zoom on the strip (log space), the clip splits, then it travels up and the page rises beneath */
+      /* T2: a camera zoom on the strip straight to the clip's final box (log space); the neighbours come back on
+         their own leg; the reel dims, then becomes the hero as the strip lifts and the page rises beneath */
       zoom: T => {
-        const e1 = soft(T / 1.6), z = Math.exp(lerp(Math.log(z0), Math.log(z1), e1));
-        B = mix(boxCam(lerp(cA, cB, e1), z), Bcs, soft((T - 1.1) / 1.0));
-        sig[i] = soft((T - .9) / .8); logoA[i] = 1 - sig[i]; lab[i] = arrive((T - 1.2) / .5); render();
-        strip.style.opacity = soft(T / .3); track.style.opacity = 1 - soft(T / .3); sHead.style.opacity = soft(T / .3);
-        rise = 120 * (1 - arrive((T - 1.4) / 1.4));
-        if (T < 1.0) { reel.style.opacity = 1 - soft((T - .2) / .8); hero(0, 0); }
-        else { reel.style.opacity = soft((T - 1.4) / .8); hero(1, rise - y); }
-        tl.style.transform = `translateY(${(-reelH * soft((T - 1.0) / 1.4)).toFixed(2)}px)`;
-        setOut(1 - soft(T / .4)); cap.style.opacity = 1 - soft(T / .35);
-        alpha = soft((T - 1.4) / .8); page(); titles(T - 1.6);
+        const e1 = soft(T / 1.2), z = Math.exp(lerp(Math.log(z0), Math.log(z1), e1)), cam = boxCam(lerp(cA, cB, e1), z), e2 = soft((T - .6) / .9);
+        B = cam.map((bx, c) => c === i ? bx : mix([bx], [Bcs[c]], e2)[0]);
+        sig[i] = soft((T - .6) / .6); logoA[i] = 1 - sig[i]; lab[i] = arrive((T - .8) / .5); render();
+        strip.style.opacity = soft(T / .25); track.style.opacity = 1 - soft(T / .25); sHead.style.opacity = soft((T - .25) / .25);   // never two playheads
+        const he = soft((T - .9) / 1.2);
+        reel.style.opacity = T < .9 ? (1 - .75 * soft((T - .1) / .5)).toFixed(3) : (.25 + .75 * soft((T - 1.0) / .9)).toFixed(3);
+        hero(he, -y);
+        bar(soft((T - .7) / 1.3)); ctlPos(soft((T - .7) / 1.3)); csTop.style.opacity = soft((T - 1.7) / .4);
+        cap.style.opacity = 1 - soft(T / .35);
+        alpha = soft((T - 1.0) / .8); rise = 80 * (1 - arrive((T - 1.0) / 1.2)); page(); titles(T - 1.1);
       },
       /* reduced motion: one crossfade, nothing travels */
       fade: T => {
         const a = soft(T / .4), sw = T >= .2;
-        tl.style.opacity = sw ? soft((T - .2) / .2) : 1 - soft(T / .2); tl.style.transform = sw ? `translateY(${-reelH}px)` : '';
-        reel.style.opacity = sw ? soft((T - .2) / .2) : 1 - soft(T / .2); hero(sw ? 1 : 0, 0);
-        B = Bcs; sig[i] = 1; lab[i] = 1; logoA[i] = 0; render(); strip.style.opacity = 1; track.style.opacity = 0; sHead.style.opacity = 1;
-        setOut(1 - a); cap.style.opacity = 1 - a; alpha = a; rise = 0; page(); titles(9);
+        tl.style.opacity = sw ? soft((T - .2) / .2) : 1 - soft(T / .2); bar(sw ? 1 : 0); ctlPos(sw ? 1 : 0); ctls.style.opacity = tl.style.opacity;
+        reel.style.opacity = tl.style.opacity; hero(sw ? 1 : 0, 0); csTop.style.opacity = sw ? 1 : 0;
+        B = Bcs; sig[i] = 1; lab[i] = 1; logoA[i] = 0; render(); strip.style.opacity = 1; track.style.opacity = sw ? 0 : 1; sHead.style.opacity = 1;
+        cap.style.opacity = 1 - a; alpha = a; rise = 0; page(); titles(9);
       }
     };
-    run({ hero: 1.8, zoom: 3.0, fade: .4 }[how], F[how], enterCS);
+    run({ hero: 1.8, zoom: 2.2, fade: .4 }[how], F[how], () => { if (how === 'hero') { cap.style.opacity = 0; } tl.style.opacity = ''; ctls.style.opacity = ''; reel.style.opacity = ''; enterCS(); });
   }
-  /* C1: step to a neighbouring company: the strip re-forms around it, the hero crossfades, the page swaps */
+  /* C1: step to a neighbouring company: the strip re-forms around it, the hero crossfades, the page swaps.
+     If the page is scrolled, it fades out, resets at alpha 0 and fades in at the top (no whip through the viewport). */
   function step(j) {
     if (mode !== 'cs' || j === tgt || j < 0 || j >= N) return;
-    mode = 'step'; root.classList.add('busy'); root.classList.remove('cs'); hideTip();
-    const i = tgt, A = boxCS(i), Bn = boxCS(j), y0 = y, p = PROJECTS[j]; let built = false;
+    mode = 'step'; root.classList.remove('in-cs'); hideTip(); layers(true); nav.inert = true;
+    const i = tgt, A = boxCS(i), Bn = boxCS(j), y0 = y, p = PROJECTS[j], far = y0 > 40, h0 = parseFloat(sHead.style.transform.slice(11)) || 0; let built = false;
     tgt = j; ctx.jump(j); S.range = [p.start, p.start + p.len];
-    run(1.4, T => {
-      const e = soft(T / 1.4); B = mix(A, Bn, e); sig[i] = 1 - e; sig[j] = e; logoA[i] = 1; logoA[j] = 1 - e;
-      lab[i] = 1 - soft(T / .3); lab[j] = arrive((T - .8) / .5); render();
-      y = ty = y0 * (1 - soft(T / 1.0)); hero(1, -y);
-      if (T >= .4 && !built) { built = true; build(j); }
-      alpha = T < .4 ? 1 - soft(T / .35) : arrive((T - .5) / .6); rise = T < .4 ? 0 : 30 * (1 - arrive((T - .5) / .8)); page();
-      if (built) titles(ctx.reduced ? 9 : T - .55);
-    }, enterCS);
+    const red = ctx.reduced, D = red ? .4 : 1.4;
+    run(D, T => {
+      const e = red ? (T >= .2 ? 1 : 0) : soft(T / 1.4);
+      B = mix(A, Bn, e); sig[i] = 1 - e; sig[j] = e; logoA[i] = 1; logoA[j] = 1 - e;
+      lab[i] = red ? 1 - e : 1 - soft(T / .3); lab[j] = red ? e : arrive((T - .8) / .5); render();
+      const cut = red ? .2 : .35;
+      if (far) { if (T >= cut) y = ty = 0; reel.style.opacity = (T < cut ? 1 - soft(T / cut) : soft((T - cut) / (red ? .2 : .55))).toFixed(3); }
+      else y = ty = y0 * (1 - soft(T / (red ? .2 : 1.0)));
+      hero(1, -y);
+      if (T >= (red ? .2 : .4) && !built) { built = true; build(j); }
+      alpha = red ? (T < .2 ? 1 - soft(T / .2) : soft((T - .2) / .2)) : T < .4 ? 1 - soft(T / .35) : arrive((T - .5) / .6);
+      rise = red || T < .4 ? 0 : 30 * (1 - arrive((T - .5) / .8)); page();
+      if (ttl) ttl.style.opacity = built ? 1 : alpha; if (built) titles(red ? 9 : T - .55);
+      headOver = lerp(h0, Bn[j][0], red ? e : soft(T / 1.4));     // the playhead travels from where it was to the new first section
+    }, () => { headOver = null; reel.style.opacity = ''; if (ttl) ttl.style.opacity = ''; enterCS(); });
   }
-  /* close: authored as a forward move (never a rewind): the page scrolls home, the hero un-clips, the timeline comes down */
+  /* close: authored as a forward move (never a rewind). At the top, the hero un-clips and the timeline comes down;
+     scrolled away, the page and hero fade out, reset, and the full reel fades up as the timeline comes down. */
   function close() {
     if (mode !== 'cs') return;
-    mode = 'closing'; root.classList.add('busy'); root.classList.remove('cs'); hideTip();
-    const y0 = y; let capd = false; S.range = null;
-    reel.style.opacity = 1;
-    run(1.6, T => {
-      const red = ctx.reduced;
-      y = ty = red ? 0 : y0 * (1 - soft(T / 1.2));
-      alpha = 1 - soft(T / (red ? .4 : .4)); page();
-      if (red) { const sw = T >= .2; hero(sw ? 0 : 1, sw ? 0 : -y); tl.style.transform = sw ? '' : `translateY(${-reelH}px)`; tl.style.opacity = sw ? soft((T - .2) / .2) : 1 - soft(T / .2); reel.style.opacity = tl.style.opacity; }
-      else { hero(1 - soft(T / 1.4), -y); tl.style.transform = `translateY(${(-reelH * (1 - soft((T - .1) / 1.4))).toFixed(2)}px)`; }
-      strip.style.opacity = 1 - soft((T - (red ? 0 : .4)) / (red ? .4 : .5)); track.style.opacity = soft((T - (red ? 0 : .6)) / (red ? .4 : .6));
-      setOut(soft((T - (red ? 0 : .8)) / (red ? .4 : .6)));
-      if (!capd && T >= (red ? 0 : .8)) { capd = true; cap.style.opacity = 1; S.holdCap = false; delete cap.dataset.i; ctx.caption(S.cur); }
-    }, () => { mode = 'home'; root.classList.remove('busy'); hero(0, 0); tl.style.transform = ''; tl.style.opacity = ''; reel.style.opacity = ''; vis.forEach(o => o.v && o.v.pause()); });
+    mode = 'closing'; root.classList.remove('in-cs'); hideTip(); nav.inert = true;
+    const y0 = y, far = y0 > 40, red = ctx.reduced; let capd = false; S.range = null;
+    run(red ? .4 : 1.6, T => {
+      if (red) {
+        const sw = T >= .2; y = ty = 0; alpha = 1 - soft(T / .2); page(); if (ttl) ttl.style.opacity = alpha;
+        hero(sw ? 0 : 1, sw ? 0 : -y0); bar(sw ? 0 : 1); ctlPos(sw ? 0 : 1); tl.style.opacity = sw ? soft((T - .2) / .2) : 1 - soft(T / .2); reel.style.opacity = tl.style.opacity; ctls.style.opacity = tl.style.opacity;
+        csTop.style.opacity = sw ? 0 : 1; strip.style.opacity = sw ? 0 : 1; track.style.opacity = sw ? 1 : 0;
+      } else {
+        alpha = 1 - soft(T / .35); page(); if (ttl) ttl.style.opacity = alpha;
+        if (far) { if (T >= .35) y = ty = 0; reel.style.opacity = (T < .35 ? 1 - soft(T / .35) : soft((T - .4) / .6)).toFixed(3); hero(T < .35 ? 1 : 0, -y); }
+        else { y = ty = y0 * (1 - soft(T / 1.2)); hero(1 - soft(T / 1.4), -y); }
+        csTop.style.opacity = 1 - soft(T / .3);
+        bar(1 - soft((T - .15) / 1.4)); ctlPos(1 - soft((T - .15) / 1.4));
+        strip.style.opacity = 1 - soft((T - .4) / .5); track.style.opacity = soft((T - .6) / .6);
+      }
+      if (!capd && T >= (red ? .2 : .8)) { capd = true; cap.style.transform = ''; cap.querySelector('.co').parentElement.style.opacity = ''; cap.style.opacity = 1; cap.style.visibility = ''; S.holdCap = false; delete cap.dataset.i; ctx.caption(S.cur); }
+    }, () => { mode = 'home'; hero(0, 0); bar(0); ctlPos(0); tl.style.opacity = ''; reel.style.opacity = ''; ctls.style.opacity = ''; vis.forEach(o => o.v && o.v.pause()); layers(false); nav.innerHTML = ''; });
   }
   function scrollTo(yy) { yy = clamp(yy, 0, maxY); if (ctx.reduced) { y = ty = yy; return; } stw = { y0: y, y1: yy, T: 0, d: clamp(Math.abs(yy - y) / 1500, .8, 1.6) }; }
 
   /* ── input ── */
-  ctx.listen(track, 'click', e => { const c = e.target.closest('.clip'); if (!c || mode !== 'home') return; e.stopPropagation(); open(+c.dataset.i, ctx.def.how); }, true);
+  ctx.listen(track, 'click', e => { const c = e.target.closest('.clip'); if (!c || mode !== 'home') return; e.stopPropagation(); ctx.user(); open(+c.dataset.i, ctx.def.how); }, true);
   ctx.listen(window, 'wheel', e => { if (mode !== 'cs') return; e.preventDefault(); stw = null; ty = clamp(ty + e.deltaY * (e.deltaMode === 1 ? 16 : 1), 0, maxY); }, { passive: false });
   ctx.listen(window, 'keydown', e => {
     if (mode === 'home') return;
+    const onCtl = e.target.closest && e.target.closest('button, a');
     const keys = { ArrowDown: 140, ArrowUp: -140, PageDown: vh * .8, PageUp: -vh * .8, ' ': vh * .8 };
+    if (e.key === ' ' && onCtl) { e.stopImmediatePropagation(); return; }                   // space activates the focused control
     if (['ArrowLeft', 'ArrowRight', 'ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', ' ', 'Home', 'End', 'Escape'].includes(e.key)) { e.preventDefault(); e.stopImmediatePropagation(); } else return;
     if (mode !== 'cs') return;
     if (e.key === 'Escape') return close();
     if (e.key === 'Home') return scrollTo(0);
     if (e.key === 'End') return scrollTo(maxY);
-    if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { const k = clamp(active + (e.key === 'ArrowRight' ? 1 : -1), 0, 4); return scrollTo(tops[k] - 130); }
+    if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { const k = clamp(active + (e.key === 'ArrowRight' ? 1 : -1), 0, 4); return scrollTo(tops[k] - (barTop + tlH + 60)); }
     stw = null; ty = clamp(ty + keys[e.key], 0, maxY);
   }, true);
-  const hit = x => { for (let c = 0; c < N; c++) for (let s = 0; s < 5; s++) { const [a, b] = secBox(B, sig, c, s); if (x >= a - 1.5 && x <= b + 1.5) return [c, s]; } return null; };
-  let tipOn = -1;
-  function hideTip() { if (tipOn >= 0) { tipOn = -1; ctx.anim(sTip, [{ opacity: +getComputedStyle(sTip).opacity }, { opacity: 0 }], 200, 'soft'); } hov = null; }
-  ctx.listen(strip, 'pointermove', e => {
+  // focus inside the page brings it into view through the page's own scroll (never the browser's)
+  ctx.listen(cs, 'scroll', () => { cs.scrollTop = 0; cs.scrollLeft = 0; });
+  ctx.listen(csIn, 'focusin', e => {
     if (mode !== 'cs') return;
-    const r = strip.getBoundingClientRect(), hh = hit(e.clientX - r.left); hov = hh;
-    if (hh && hh[0] !== tgt) {
-      const p = PROJECTS[hh[0]], [L, R] = B[hh[0]];
-      if (tipOn !== hh[0]) { tipOn = hh[0]; sTip.innerHTML = p.kind === 'personal' ? `${Pf.esc(p.name)}<i>personal</i>` : `${Pf.esc(p.co)}<i>${Pf.esc(p.yr)}</i>`; sTip.style.left = ((L + R) / 2) + 'px';
-        ctx.anim(sTip, [{ opacity: 0, transform: 'translate(-50%,-6px)' }, { opacity: 1, transform: 'translate(-50%,0)' }], 320, 'arrive'); }
-    } else if (tipOn >= 0) hideTip(), hov = hh;
-  });
-  ctx.listen(strip, 'pointerleave', hideTip);
-  ctx.listen(strip, 'click', e => {
-    if (mode !== 'cs') return; const r = strip.getBoundingClientRect(), hh = hit(e.clientX - r.left); if (!hh) return;
-    if (hh[0] === tgt) scrollTo(tops[hh[1]] - 130); else step(hh[0]);
+    let top = 0, el = e.target; while (el && el !== csIn) { top += el.offsetTop; el = el.offsetParent; }
+    const vis0 = y + barTop + tlH + 40, vis1 = y + vh - 60;
+    if (top < vis0 || top + e.target.offsetHeight > vis1) scrollTo(top - vh * .4);
   });
 
   /* ── the master clock ── */
@@ -330,7 +399,12 @@ function makeCase(ctx) {
       hero(1, -y); page();
     }
     if (mode !== 'home') {
-      sHead.style.transform = `translateX(${headX().toFixed(2)}px)`; veils();
+      const hx = headX(), x = headOver ?? hx;
+      sHead.style.transform = `translateX(${x.toFixed(2)}px)`; veils();
+      // the active section's 2 px ink bar (follows on a short damp)
+      const on = active >= 0 && (mode === 'cs' || mode === 'step') && headOver === null, [a, b] = on ? secBox(B, sig, tgt, active) : [indA, indA + indW];
+      indA = indO < .01 || ctx.reduced ? a : damp(indA, a, 14, dt); indW = indO < .01 || ctx.reduced ? b - a : damp(indW, b - a, 14, dt); indO = damp(indO, on ? 1 : 0, 14, dt);
+      sInd.style.transform = `translateX(${indA.toFixed(2)}px) scaleX(${(indW / 100).toFixed(4)})`; sInd.style.opacity = indO.toFixed(3);
       if (fr % 4 === 0) vis.forEach(o => {
         const r = o.el.getBoundingClientRect(), inView = r.bottom > 0 && r.top < vh && alpha > .01;
         if (!o.on && r.top < vh * .88 && inView) {
@@ -338,47 +412,50 @@ function makeCase(ctx) {
           if (ctx.reduced) { o.el.style.clipPath = 'none'; ctx.anim(o.el, [{ opacity: 0 }, { opacity: 1 }], 250, 'soft'); }
           else { ctx.anim(o.el, [{ clipPath: 'inset(100% 0 0 0)' }, { clipPath: 'inset(0% 0 0 0)' }], 1200, 'arrive'); if (o.v) ctx.anim(o.v, [{ transform: 'scale(1.15)' }, { transform: 'scale(1)' }], 1200, 'arrive'); }
         }
-        if (o.v) { const want = inView && mode !== 'closing'; if (want !== o.play) { o.play = want; if (want) { o.v.playbackRate = ctx.speed; o.v.play().catch(() => {}); } else o.v.pause(); } }
+        if (o.v) { const want = inView && mode !== 'closing' && !ctx.reduced && S.playing; if (want !== o.play) { o.play = want; if (want) { o.v.playbackRate = ctx.speed; o.v.play().catch(() => {}); } else o.v.pause(); } }
       });
     }
   });
   render();
-  return { open, close, step, scrollTo, get tops() { return tops; }, get mode() { return mode; } };
+  return { open, close, step, scrollTo, get tops() { return tops; }, get mode() { return mode; }, get y() { return y; }, geo: { barTop, tlH, SW, G } };
 }
 
 /* demo helpers: where things are on screen */
 const clipX = (ctx, i) => { const p = ctx.PROJECTS[i]; return 36 + (p.start + p.len / 2) / ctx.TOTAL * ctx.W; };
-const TRACK_Y = () => innerHeight * .95, BAR_Y = () => innerHeight * .05;
+const TRACK_Y = () => innerHeight * .95, BAR_Y = ctx => ctx.cs.geo.barTop + ctx.cs.geo.tlH / 2;
 
 Pf.define({
   /* ──────────────────────────────────────────────────────────────────────────
      T1 · the reel becomes the hero
 
-     Click a logo: the playing film never cuts. The reel itself settles into the case study's hero
-     frame (it shrinks from full bleed and its frame closes to the hero's proportions), the timeline
-     rises to the top like a camera crane and re-forms as that company's five sections, and the page
-     continues below. If another clip was playing, its film crossfades in on the way.
+     Click a logo (its label says "open case study"): the playing film never cuts. The reel itself settles
+     into the case study's hero frame (scale 0.86, its frame closing a little to the hero's proportions),
+     the caption's title travels and becomes the page's h1, the timeline rises like a camera crane and
+     re-forms as that company's five sections, and the page continues below. If another clip was playing,
+     its film crossfades in on the way. Name, contact, pause and sound stay on screen as a compact chrome.
      Timing at 1× (one timeline T, ≈ 1.8 s; every leg overlaps the last):
-       0.00–1.40   hero: scale 1 → 0.95 in log space, translate into place, clip-path inset closes
-                   to the hero frame (radius 0 → 6 px); master curve. The reel's shade lifts with it.
-       0.00–0.40   name, contact, caption and sound fade out (master curve).
-       0.15–1.55   timeline travels to the top as one container (translateY, master curve).
-       0.25–0.75   the whole-reel clips fade out; 0.60–1.20 the sections fade in (a camera-drawn
-                   strip: frames positioned, never scaled); labels 0.90–1.40 (expo-out).
-       0.50–1.60   the page rises 60 px into place and fades up (expo-out); title lines rise from
-                   their masks from 0.60 (900 ms, 70 ms stagger).
-       1.10–1.40   the playhead appears on the first section; from then on it follows the scroll.
-     Afterwards (as in C1): smooth scroll (λ = 9/s), sections clickable, Esc or "back to the reel"
-     closes with a forward move (1.6 s): the page scrolls home, the hero un-clips, the timeline
-     comes down, the reel plays on from where it is.
+       0.00–1.40   hero: scale 1 → 0.86 in log space, translate into place, clip-path inset closes to the
+                   hero frame (radius 0 → 6 px); master curve. It never takes the page's rise.
+       0.10–1.50   the caption's title line travels to the h1's place (same metrics, transform only) and
+                   hands over to it; its company line fades (0.10–0.60); the logo line fades in 1.10–1.60.
+       0.10–1.50   pause and sound travel up beside the contact links (master curve).
+       0.20–1.60   timeline travels to the top as one container (translateY, master curve), floating
+                   (no band of stage across the film); a backdrop fades in under it as it lands (1.2–1.6).
+       0.25–0.75   the whole-reel clips fade out; 0.60–1.20 the sections fade in (desaturated frames, drawn
+                   from a camera, never scaled); labels 0.90–1.40 (expo-out).
+       0.60–1.70   the rest of the page rises 60 px into place and fades up (expo-out), text only.
+       1.10–1.40   the playhead appears on the first section; from then on it follows the scroll; a 2 px
+                   ink bar marks the current section.
+     Afterwards (as in C1): smooth scroll (λ = 9/s), sections and neighbours are real buttons, Esc or
+     "back to the reel" closes with a forward move (1.6 s).
      Scripted demo: a pointer dot clicks IKEA while it plays; then scrolls a little to show the page.
      Reduced motion: one 400 ms crossfade into the case study, nothing travels.
      ────────────────────────────────────────────────────────────────────────── */
   T1: {
     title: 'the reel becomes the hero',
     does: 'click a logo · the film settles into the hero',
-    why: 'No cut: what you were watching is what you open, so the case study starts with attention already on it · the hero has to be the reel’s aspect (16:9-ish), which limits art direction of the case study top.',
-    how: 'hero',
+    why: 'No cut: what you were watching is what you open, and its caption becomes the title · the hero keeps the reel’s aspect, which limits art direction at the top of the case study.',
+    how: 'hero', opts: { clipAction: 'open case study' },
     setup(ctx) { ctx.cs = makeCase(ctx); },
     async play(ctx) {
       const p = ctx.pointer;
@@ -398,30 +475,31 @@ Pf.define({
   /* ──────────────────────────────────────────────────────────────────────────
      T2 · zoom into the clip
 
-     Click a logo: the timeline is a camera on the career. It zooms into the clicked clip until the
-     clip fills the strip, the neighbours sliding away; the clip splits into its five sections and
-     the neighbours come back as thin clips at both ends. Then the strip travels to the top and the
-     case study rises beneath it.
-     Timing at 1× (one timeline T, ≈ 3.0 s):
-       0.00–1.60   zoom: z = exp(lerp(ln z0, ln z1)) (log space, constant perceived rate) and the camera
-                   centre moves to the clip, master curve. Clip boxes are clip-paths, frames are
-                   translated tiles that fill in as they get room (no scaling, 1 px stays 1 px).
-       0.90–1.70   the clip splits: 3 px gaps open, inner corners round, the logo gives way to the
-                   section labels (1.20–1.70, expo-out).
-       1.10–2.10   the neighbours return as thin clips at both ends (master curve).
-       0.20–1.00   the reel dims to the stage, so the eye stays on the strip.
-       1.00–2.40   the strip travels to the top (master curve).
-       1.40–2.80   the case study rises 120 px beneath it and fades up (expo-out); the hero is the reel,
-                   now in its hero frame; title lines from 1.60.
-       the playhead rides the clicked clip's first frame throughout, then follows the scroll.
+     Click a logo: the timeline is a camera on the career. It zooms into the clicked clip, straight to the
+     box the clip will keep (no overshoot); the neighbours slide away and come back as thin clips at both
+     ends on their own leg; the clip splits into its five sections. The reel dims while the strip has the
+     stage, then becomes the hero as the strip lifts to the top and the page rises beneath it.
+     Timing at 1× (one timeline T, ≈ 2.2 s):
+       0.00–1.20   zoom: z = exp(lerp(ln z0, ln z1)) (log space) and the camera centre moves so the clip lands
+                   exactly on its final box; master curve. Clip boxes are clip-paths, frames are translated
+                   tiles that fill in as they get room (no scaling, 1 px stays 1 px).
+       0.60–1.50   the neighbours return as thin clips (master curve), their own leg.
+       0.60–1.20   the clip splits: 3 px gaps open, inner corners round, the logo gives way to the section
+                   labels (0.80–1.30, expo-out).
+       0.00–0.50   the strip takes over from the timeline; its playhead appears only once the kit's has gone
+                   (0.25–0.50), so there are never two.
+       0.10–0.60   the reel dims to 25 % (never to black); 0.90–2.10 it moves into the hero frame and comes
+                   back to full (master curve).
+       0.70–2.00   the strip travels to the top with pause and sound (master curve); backdrop 1.7–2.1.
+       1.00–2.20   the page text rises 80 px beneath it and fades up (expo-out); title lines from 1.10.
      Scripted demo: a pointer dot clicks Telekom (neighbours on both sides), then rests.
      Reduced motion: one 400 ms crossfade, no zoom or travel.
      ────────────────────────────────────────────────────────────────────────── */
   T2: {
     title: 'zoom into the clip',
     does: 'click a logo · the timeline zooms into its sections',
-    why: 'Makes the structure explicit: a project is a stretch of the career and a case study is that stretch up close · the longest move (3 s) and a beat of dark stage between reel and page.',
-    how: 'zoom',
+    why: 'Makes the structure explicit: a project is a stretch of the career, and a case study is that stretch up close · the longest move (2.2 s), and the reel steps back while the strip performs.',
+    how: 'zoom', opts: { clipAction: 'open case study' },
     setup(ctx) { ctx.cs = makeCase(ctx); },
     async play(ctx) {
       const p = ctx.pointer;
@@ -433,53 +511,56 @@ Pf.define({
       await ctx.wait(700);
       await p.to(860, 520, 1400, 'soft');
       p.hide();
-      await ctx.wait(3000);
+      await ctx.wait(2400);
     }
   },
 
   /* ──────────────────────────────────────────────────────────────────────────
      C1 · the timeline as section navigation
 
-     A case study (IKEA as the example) with the timeline at the top: its clips are the sections
-     (problem, research, concepts, design, outcome), drawn from the company's own film frames; the
-     playhead follows the scroll; clicking a section scrolls there; the neighbouring companies sit as
-     thin clips at the ends (IKEA is the oldest, so they are all on the right) to step to. The hero
-     is the reel, looping that company's films. Copy is placeholder, marked quietly.
+     A case study (IKEA as the example) with the timeline at the top, under a compact chrome (name, role,
+     contact, pause, sound): its clips are the sections (problem, research, concepts, design, outcome),
+     drawn from the company's own film frames, desaturated so film colour never reads as selection; the
+     playhead follows the scroll and a 2 px ink bar marks the current section; sections and neighbours are
+     real buttons ("research, section 2 of 5", "Telekom · open case study"); the neighbouring companies
+     sit as thin clips with small logos at the ends (IKEA is the oldest, so they are all on the right).
+     The hero is the reel, looping that company's films. Copy is placeholder, marked quietly.
      Timing at 1×:
-       scroll       wheel and keys move a target; the page follows with λ = 9/s (Lenis-like, one
-                    smoothing stage). Media reveal when 12 % in view: clip-path inset 100 % → 0 with
-                    an inner scale 1.15 → 1 (1.2 s, expo-out); films play only while visible.
-       playhead     no smoothing of its own (the scroll is already smoothed): the line 30 % down the
-                    screen maps piecewise onto the sections, so it crosses a gap exactly as a section
-                    heading passes that line. The current section brightens (320 ms).
+       scroll       wheel and keys move a target; the page follows with λ = 9/s (one smoothing stage).
+                    Focus inside the page scrolls it into view the same way. Media reveal when 12 % in view:
+                    clip-path inset 100 % → 0 with an inner scale 1.15 → 1 (1.2 s, expo-out); films play
+                    only while visible and while the reel plays.
+       playhead     no smoothing of its own (the scroll is already smoothed): the line 30 % down the screen
+                    maps piecewise onto the sections. The ink bar follows the current section (λ = 14/s).
        section      click: scroll there over clamp(distance / 1500, 0.8, 1.6) s on the master curve;
-                    the playhead follows through the mapping. ← → step sections, Esc closes.
-       step         click a thin clip (or "next" at the bottom): over 1.4 s on the master curve the
-                    strip re-forms around the new company (its sections open, the old ones close into
-                    a thin clip), the page scrolls home, the hero crossfades to the new films (1.0 s),
-                    the copy fades out (350 ms) and back in rising 30 px (expo-out).
+                    ← → step sections, Esc closes.
+       step         click a thin clip (or "next" at the bottom): over 1.4 s on the master curve the strip
+                    re-forms around the new company and the playhead travels from where it was to the new
+                    first section; the hero crossfades to the new films (1.0 s). If the page is scrolled,
+                    page and hero fade out (350 ms), the scroll resets unseen, and both fade in at the top
+                    (no whip); the copy rises 30 px (expo-out).
      Scripted demo: scroll through problem and research, click "concepts", then step to Telekom.
-     Reduced motion: no smoothing, no reveals (250 ms fades), 400 ms crossfades for steps; no autoplay.
+     Reduced motion: no smoothing, no reveals (250 ms fades), 400 ms crossfades for steps and close.
      ────────────────────────────────────────────────────────────────────────── */
   C1: {
     title: 'timeline as section navigation',
     does: 'sections on the timeline · playhead follows the scroll',
     why: 'One navigation for the whole site: you always see where you are in the story and in the career · the strip carries a lot (sections, neighbours, playhead) in 48 px, and labels need the width.',
-    how: 'hero',
+    how: 'hero', opts: { clipAction: 'open case study' },
     setup(ctx) { ctx.cs = makeCase(ctx); ctx.cs.open(0, 'instant'); },
     async play(ctx) {
-      const p = ctx.pointer, cs = ctx.cs;
+      const p = ctx.pointer, g = ctx.cs.geo;
       await ctx.wait(1400);
       p.show(760, 560); await ctx.wait(450);
-      for (let k = 0; k < 9; k++) { p.wheel(100); await ctx.wait(140); }   // through the title into "problem"
+      for (let k = 0; k < 9; k++) { p.wheel(100); await ctx.wait(140); }    // through the title into "problem"
       await ctx.wait(1400);
       for (let k = 0; k < 6; k++) { p.wheel(110); await ctx.wait(140); }    // into "research"
       await ctx.wait(1200);
-      const W = ctx.W, sw = (W - 4 * 29 - 12) / 5;                          // section width in IKEA's strip
-      await p.to(36 + 2 * (sw + 3) + sw / 2, BAR_Y(), 1300, 'soft');        // "concepts"
+      const W = ctx.W, TW = W - 4 * (g.SW + g.G), sw = (TW - 12) / 5;        // IKEA's strip: sections, then four neighbours
+      await p.to(36 + 2 * (sw + 3) + sw / 2, BAR_Y(ctx), 1300, 'soft');     // "concepts"
       await ctx.wait(300); p.down(); await ctx.wait(110); p.up();
       await ctx.wait(2200);
-      await p.to(36 + W - 4 * 29 + 3 + 13, BAR_Y(), 1100, 'soft');          // the thin Telekom clip
+      await p.to(36 + TW + g.G + g.SW / 2, BAR_Y(ctx), 1100, 'soft');       // the thin Telekom clip
       await ctx.wait(700); p.down(); await ctx.wait(110); p.up();
       await ctx.wait(1000);
       await p.to(820, 560, 1300, 'soft');

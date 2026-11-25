@@ -13,10 +13,10 @@
 .kl>span{grid-area:1/1;display:block;will-change:transform,opacity}
 .kl.l1{height:34px}
 .kl.l1 img{display:block;width:auto;filter:drop-shadow(0 1px 8px rgba(0,0,0,.35))}
-.kl.l1 .tag{font:600 11px/1 var(--sans);letter-spacing:.16em;text-transform:uppercase;color:var(--ink-2);padding-bottom:2px}
+.kl.l1 .tag{font:600 11px/1 var(--sans);letter-spacing:.16em;text-transform:uppercase;color:var(--ink-2o);padding-bottom:2px}
 .kl.l2{margin-top:12px;font:400 44px/1.08 var(--serif);letter-spacing:-.015em;padding-bottom:.06em}
-.kl.l3{margin-top:10px;font-size:12px;line-height:1.4;color:var(--ink-2)}
-.kl.l3 i{font-style:normal;color:var(--ink-3);margin:0 8px}
+.kl.l3{margin-top:10px;font-size:12px;line-height:1.4;color:var(--ink-2o)}
+.kl.l3 i{font-style:normal;color:var(--ink-2o);margin:0 8px}
 </style>
 </head>
 <body>
@@ -26,74 +26,81 @@
    K1 · the caption as a lower third
 
    The company's white logo replaces its name; under it, the project (the film being shown) and the
-   role · year. On a clip change every line leaves and arrives on its own beat; inside a clip, at
-   each cut, only the second line changes, naming the new film. Personal clips carry a quiet
-   "personal project" tag instead of a logo.
+   role · year. The cut is the hero: inside a clip, at each cut, the second line wipes from the old
+   film's name to the new one while the logo and the role stay put. On a clip change every line
+   leaves and arrives on its own beat. Personal clips carry the quiet "personal" tag instead of a logo.
    Timing at 1×:
-     leave        each line slides up out of its mask: translateY 0 → −105 %, opacity → 0, 300 ms,
-                  expo-in. Beats: logo 0 ms, project 80 ms, role 160 ms.
-     arrive       the new line rises from below its mask: 105 % → 0, 900 ms, expo-out. It starts at
-                  half of its own line's exit, so old and new overlap and the line never stands empty.
-                  Beats: logo 380 ms, project 470 ms, role 560 ms after the cut (the arrivals land
-                  around the reel crossfade's midpoint, R4).
-     in-clip cut  only the project line: out at 0, in at 380 ms (same curves).
-   Scripted demo: plays IKEA through its first cut (the second line changes to the next film), then
-   Telekom and the collection (whose films are cut every ≈ 4 s).
-   Reduced motion: lines crossfade (250 ms), no slide; no autoplay.
+     in-clip cut  line 2 only: the old name wipes away left → right (clip-path inset, 340 ms, expo-in),
+                  the new one wipes in left → right from 360 ms (800 ms, expo-out); it never shares
+                  the line with the old one. Logo and role do not move.
+     clip change  each line slides up out of its mask (translateY −105 %, opacity → 0, 300 ms, expo-in)
+                  at 0 / 80 / 160 ms; the new lines rise from below (105 % → 0, 900 ms, expo-out) at
+                  380 / 470 / 560 ms, each after its own line's exit has finished, landing around the
+                  reel crossfade's midpoint (R4).
+     contrast     the kit's lower-left scrim sits behind the block (AA against the brightest frames).
+     a11y         the visual lines are hidden from assistive tech; one composed string per change
+                  ("IKEA, the archive intro, product designer, years to confirm"), announced politely
+                  only right after a user action, silent during autoplay.
+   Scripted demo: plays IKEA through its first cut (the second line wipes to the next film), then
+   Telekom (every line on its beat) and the collection (a cut every ≈ 4 s).
+   Reduced motion: lines crossfade (250 ms), no slide or wipe; no autoplay.
    ────────────────────────────────────────────────────────────────────────── */
 const FILMNAME = { archive: 'the archive, intro', 'collection-home': 'collection, home', board: 'exploration board', 'collection-recipes': 'collection, recipes',
-  'recipe-page': 'recipe page', a1: 'assistant, a1', g3: 'assistant, g3', f2: 'assistant, f2', p5: 'assistant, p5', g4: 'assistant, g4', f4: 'assistant, f4', f1: 'assistant, f1' };
+  'recipe-page': 'recipe page', a1: 'assistant, presence', g3: 'assistant, answers', f2: 'assistant, food', p5: 'assistant, keep', g4: 'assistant, facts', f4: 'assistant, corrections', f1: 'assistant, actions' };
 const CAPLOGO = { ikea: 22, telekom: 32, redbull: 26 };
 
 Pf.define({
   K1: {
     title: 'caption as a lower third',
-    does: 'white logo · project · role, each on its own beat',
-    why: 'The logo is recognised before it is read, and the second line tells you which project you are watching · logos of different shapes make the lines uneven; needs per-logo sizing.',
+    does: 'white logo · the cut wipes the project line',
+    why: 'The logo is recognised before it is read, and every cut names the film you are now watching · logos of different shapes make the lines uneven; needs per-logo sizing.',
     setup(ctx) {
       const { root, S, PROJECTS } = ctx;
       root.classList.add('k1');
-      root.insertAdjacentHTML('beforeend', '<div class="k1cap" aria-live="polite"><div class="kl l1"></div><div class="kl l2"></div><div class="kl l3"></div></div>');
+      root.insertAdjacentHTML('beforeend', '<div class="k1cap" aria-hidden="true"><div class="kl l1"></div><div class="kl l2"></div><div class="kl l3"></div></div>');
       const L = [...root.querySelectorAll('.k1cap .kl')];
       const text = (i, seg) => {
         const p = PROJECTS[i], g = p.segs[seg || 0];
         return [
-          p.kind === 'work' ? `<img src="media/logos-${p.logo}.svg" alt="${Pf.esc(p.co)}" style="height:${CAPLOGO[p.logo]}px">` : '<span class="tag">personal project</span>',
+          p.kind === 'work' ? `<img src="media/logos-${p.logo}.svg" alt="" style="height:${CAPLOGO[p.logo]}px">` : '<span class="tag">personal</span>',
           Pf.esc(FILMNAME[g.film] || g.film),
           `${Pf.esc(p.role)}<i>·</i>${Pf.esc(p.yr)}`
         ];
       };
-      // one line: the old span leaves, the new one arrives at half the exit, both in the same grid cell
-      function swap(k, html, delay, first) {
+      const freeze = el => el.getAnimations().forEach(a => { try { a.commitStyles(); } catch (_) {} a.cancel(); });
+      // one line: the old span leaves completely before the new one arrives (never two in the cell at once)
+      function swap(k, html, outAt, inAt, how) {
         const line = L[k], old = [...line.children], nu = document.createElement('span');
         nu.innerHTML = html; line.appendChild(nu);
         if (ctx.reduced) {
-          old.forEach(o => ctx.anim(o, [{ opacity: 1 }, { opacity: 0 }], 250, 'soft').finished.then(() => o.remove()).catch(() => {}));
-          ctx.anim(nu, [{ opacity: 0 }, { opacity: 1 }], 250, 'soft');
+          old.forEach(o => { freeze(o); ctx.anim(o, [{ opacity: 0 }], 250, 'soft').finished.then(() => o.remove()).catch(() => {}); });
+          ctx.anim(nu, [{ opacity: 0 }, { opacity: 1 }], 250, 'soft', { delay: ctx.ms(150) });
           return;
         }
         old.forEach(o => {
-          o.getAnimations().forEach(a => a.commitStyles && (a.commitStyles(), a.cancel()));
-          ctx.anim(o, [{ transform: getComputedStyle(o).transform === 'none' ? 'none' : getComputedStyle(o).transform, opacity: getComputedStyle(o).opacity }, { transform: 'translateY(-105%)', opacity: 0 }], 300, 'leave', { delay: ctx.ms(delay) })
-            .finished.then(() => o.remove()).catch(() => {});
+          freeze(o);
+          const kf = how === 'wipe' ? [{ clipPath: 'inset(0 0 0 100%)' }] : [{ transform: 'translateY(-105%)', opacity: 0 }];
+          ctx.anim(o, kf, how === 'wipe' ? 340 : 300, 'leave', { delay: ctx.ms(outAt) }).finished.then(() => o.remove()).catch(() => {});
         });
-        ctx.anim(nu, [{ transform: 'translateY(105%)', opacity: 0 }, { transform: 'none', opacity: 1 }], 900, 'arrive', { delay: ctx.ms(first ? delay : delay + 150) });
+        if (how === 'wipe') ctx.anim(nu, [{ clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)' }], 800, 'arrive', { delay: ctx.ms(inAt) });
+        else ctx.anim(nu, [{ transform: 'translateY(105%)', opacity: 0 }, { transform: 'none', opacity: 1 }], 900, 'arrive', { delay: ctx.ms(inAt) });
       }
       const BEAT = { out: [0, 80, 160], in: [380, 470, 560] };
       let cur = -1, seg = -1;
       function update(first) {
         const i = S.cur, s = S.seg || 0;
         if (i === cur && s === seg) return;
-        const t = text(i, s);
-        if (i !== cur) t.forEach((h, k) => swap(k, h, first ? 120 + k * 90 : BEAT.out[k], first));
-        else swap(1, t[1], 0);
+        const t = text(i, s), p = PROJECTS[i];
+        if (i !== cur) t.forEach((h, k) => swap(k, h, first ? 0 : BEAT.out[k], first ? 120 + k * 90 : BEAT.in[k], 'slide'));
+        else swap(1, t[1], 0, 360, 'wipe');
+        ctx.announce(`${p.kind === 'work' ? p.co : 'personal'}, ${FILMNAME[p.segs[s].film] || ''}, ${p.role}, ${p.yr}`);
         cur = i; seg = s;
       }
       update(true);
       ctx.on('frame', () => update(false));
     },
     async play(ctx) {
-      await ctx.wait(7400);                // IKEA's first cut at 6.0 s: only the project line changes
+      await ctx.wait(7400);                // IKEA's first cut at 6.0 s: only the project line wipes
       ctx.jump(1); await ctx.wait(3800);   // Telekom: every line on its own beat
       ctx.jump(4); await ctx.wait(5600);   // the collection: a cut every ≈ 4 s
     }

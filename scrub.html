@@ -13,11 +13,14 @@
 .s1.grabbing .clip .strip{filter:brightness(.5) saturate(.95)}
 .s1.grabbing .tip{opacity:0 !important}
 
-/* S2 · hover to preview: a second deck of two layers over the reel, and a ghost line */
-.pv{position:absolute;inset:0;opacity:0;will-change:opacity,transform;pointer-events:none}
+/* S2 · hover to preview: a second deck of two layers over the reel (under the scrims), and a ghost line */
+.pv{position:absolute;inset:0;z-index:1;opacity:0;will-change:opacity,transform;pointer-events:none}
 .pv video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0}
 .pv video.on{opacity:1}
+.pv video.top{z-index:1}
 .ghost{position:absolute;top:-6px;bottom:-6px;left:0;width:1px;margin-left:-.5px;background:var(--ink);opacity:0;pointer-events:none;will-change:transform,opacity;z-index:3}
+.s2 .clip.pvh{box-shadow:inset 0 0 0 1px var(--ink-2)}   /* the clip being previewed: outlined, distinct from the playing one */
+.s2 .clip.pvh .strip{filter:brightness(.5) saturate(.95)}
 </style>
 </head>
 <body>
@@ -30,37 +33,40 @@ Pf.define({
   /* ──────────────────────────────────────────────────────────────────────────
      S1 · drag to scrub
 
-     Grab anywhere on the timeline and drag: the playhead follows the pointer through a smoothed,
-     time-corrected target and the reel shows that moment of the film (paused on the frame, like an
-     editor). Let go and a short inertia carries it on; it settles on the next clip start if the
-     throw lands near one, otherwise where it lands, and plays on from there.
+     Grab anywhere on the timeline and drag: the playhead follows the pointer (relatively at first, so
+     it never jumps on the grab) and the reel shows that moment of the film, paused on the frame like an
+     editor. Let go and a short inertia carries the playhead on; the reel is already on the landing
+     frame, and the playhead settles there, then the film eases back into real time.
      Timing at 1×:
        grab         a press arms; 3 px of movement starts the scrub (a plain click still jumps, as in H1).
+                    The playhead keeps its place: the grab offset returns on a critically damped spring
+                    (ω = 10/s, soft start), so it slides under the pointer within ≈ 0.5 s. The reel waits until that offset is under 3 px (no burst of
+                    cuts on the grab), then seeks once per frame. Every film is paused while held.
        follow       playhead time damps towards the pointer, λ = 14/s (≈ lerp .2 per frame at 60 fps);
-                    the reel seeks once per frame (never while a seek is pending); cuts between films
-                    crossfade in 320 ms without the settle push.
+                    cuts between films crossfade in 320 ms without the settle push.
        release      pointer velocity over the last 100 ms; projected landing = pointer + v / 6
                     (exponential decay). Snap: the nearest clip start ahead of the playhead (in the
-                    throw's direction, never back against it) within 40 % of a clip width.
-       settle       a critically damped approach from the playhead's own position and velocity
-                    (ω ≥ 6/s, raised so it never overshoots or turns back), ≈ 0.5–0.9 s; then the clock
-                    resumes from there.
-       frames       brighten while held (420 ms, the kit's filter transition).
+                    throw's direction, never back against it) within 40 % of a clip width; it lands
+                    0.05 s inside that clip, so the reel shows the new clip's first frame at once.
+       settle       the playhead's own position and velocity carry into a critically damped return
+                    (ω ≥ 6/s, raised so it never overshoots or turns back); it ends within 0.5 px.
+       resume       the clock eases from rate 0 to 1 over 400 ms (master curve), if it was playing.
      Scripted demo: a pointer dot grabs IKEA, drags slowly into Telekom, then flicks; the throw
      carries on and settles on Red Bull's first frame, which plays.
-     Reduced motion: 1:1 follow, no inertia; on release it jumps to a nearby clip start (crossfade)
-     or stays; no autoplay.
+     Reduced motion: 1:1 follow, no inertia; on release it jumps to a nearby clip start or stays;
+     no autoplay.
      ────────────────────────────────────────────────────────────────────────── */
   S1: {
     title: 'drag to scrub',
     does: 'drag the playhead · inertia · settles on a clip',
-    why: 'Feels like an editor and lets you sample the whole reel in one gesture · seeking long-GOP films costs frames; needs keyframe-dense encodes.',
+    why: 'Feels like an editor and lets you sample the whole reel in one gesture · every frame of the drag is a seek, so the films need dense keyframes (now every 8 frames).',
     setup(ctx) {
-      const { root, S, PROJECTS, TOTAL } = ctx, tl = ctx.$('#tl'), track = ctx.track;
+      const { root, S, PROJECTS, TOTAL, EASE } = ctx, tl = ctx.$('#tl'), track = ctx.track;
       root.classList.add('s1');
-      let mode = 'idle', x0 = 0, target = 0, tSm = 0, vSm = 0, samples = [], justDragged = false, wasPlaying = true, thr = null, last = performance.now();
+      let mode = 'idle', x0 = 0, ptr = 0, off = 0, offV = 0, tSm = 0, armedSeek = false, samples = [], justDragged = false, wasPlaying = true, ramp = -1, last = performance.now();
+      const W = () => track.getBoundingClientRect().width;
       const tOf = x => { const r = track.getBoundingClientRect(); return Math.max(0, Math.min(TOTAL - .05, (x - r.left) / r.width * TOTAL)); };
-      const starts = PROJECTS.map(p => p.start).concat([]);
+      const pxOf = t => t / TOTAL * W();
 
       ctx.listen(tl, 'pointerdown', e => {
         if (e.button > 0) return;
@@ -70,21 +76,23 @@ Pf.define({
       });
       ctx.listen(window, 'pointermove', e => {
         if (mode === 'armed' && Math.abs(e.clientX - x0) > 3) {
-          mode = 'drag'; thr = null; wasPlaying = S.playing; ctx.pause(); root.classList.add('grabbing');
-          tSm = S.t; vSm = 0; S.glide = null;
+          mode = 'drag'; ramp = -1; S.rate = 1; wasPlaying = S.playing; ctx.pause({ quiet: true }); root.classList.add('grabbing');
+          tSm = Math.max(0, Math.min(TOTAL - .05, S.headX / W() * TOTAL)); S.t = tSm; S.off = S.offV = 0;
+          ptr = tOf(e.clientX); off = ctx.reduced ? 0 : ptr - tSm; offV = 0; armedSeek = ctx.reduced;
+          if (armedSeek) ctx.seek(tSm);
         }
         if (mode !== 'drag') return;
-        target = tOf(e.clientX);
+        ptr = tOf(e.clientX);
         const now = performance.now(); samples.push({ x: e.clientX, t: now });
         while (samples.length > 2 && now - samples[0].t > 100) samples.shift();
       });
-      const release = e => {
+      const release = () => {
         if (mode === 'armed') { mode = 'idle'; return; }
         if (mode !== 'drag') return;
-        root.classList.remove('grabbing'); justDragged = true; setTimeout(() => (justDragged = false), 50);
+        root.classList.remove('grabbing'); justDragged = true; ctx.after(50, () => (justDragged = false));
         const a = samples[0], b = samples[samples.length - 1], dtS = Math.max(.016, (b.t - a.t) / 1000);
-        const vPx = (performance.now() - b.t > 120) ? 0 : (b.x - a.x) / dtS, W = track.getBoundingClientRect().width;
-        const vT = vPx / W * TOTAL;                                   // reel seconds per second (real time)
+        const vPx = (performance.now() - b.t > 120) ? 0 : (b.x - a.x) / dtS, vT = vPx / W() * TOTAL;
+        const target = ptr - off;
         let land = Math.max(0, Math.min(TOTAL - .05, target + (ctx.reduced ? 0 : vT / 6)));
         // snap: the nearest clip start ahead of the playhead, in the throw's direction, within 40 % of a clip
         const dir = Math.sign(land - tSm) || Math.sign(vT) || 1;
@@ -93,12 +101,13 @@ Pf.define({
           const c = p.start, ahead = (c - tSm) * dir >= -1e-3, w = Math.min(p.len, (PROJECTS[i - 1] || p).len);
           if (ahead && Math.abs(c - land) < .4 * w && (best === null || Math.abs(c - land) < Math.abs(best - land))) best = c;
         });
-        if (best !== null) land = best;
-        if (ctx.reduced) { if (best !== null) ctx.jump(ctx.clipAt(best + .01)); else ctx.seek(target); mode = 'idle'; ctx.play(); return; }
-        // settle: critically damped from (tSm, vSm) to land, ω raised so it never overshoots or turns back
-        const C1 = tSm - land, toward = vSm * C1 < 0;
-        const w = Math.min(30, Math.max(6, toward ? Math.abs(vSm) / Math.max(1e-4, Math.abs(C1)) * 1.05 : 6));
-        thr = { land, C1, C2: vSm + w * C1, w, t: 0 };
+        if (best !== null) land = best + .05;                  // inside the clip: its first frame, not the last of the previous
+        const x = S.headX, v = ctx.headV;
+        ctx.seek(land, { fade: 320, settle: 900 });           // the reel goes to the landing frame now
+        if (ctx.reduced) { mode = 'idle'; if (wasPlaying) ctx.play(); return; }
+        // settle: the playhead carries its velocity into a critically damped return, ω raised so it never overshoots
+        const o0 = x - ctx.xOf(land), toward = v * o0 < 0;
+        S.off = o0; S.offV = v; S.offW = Math.min(30, Math.max(6, toward ? Math.abs(v) / Math.max(.5, Math.abs(o0)) * 1.05 : 6));
         mode = 'throw';
       };
       ctx.listen(window, 'pointerup', release);
@@ -108,16 +117,18 @@ Pf.define({
       ctx.on('tick', () => {
         const now = performance.now(), dt = Math.min(.064, (now - last) / 1000) * ctx.speed; last = now;
         if (mode === 'drag') {
-          const prev = tSm;
+          { const w = 10; let left = dt; while (left > 0) { const hh = Math.min(left, 1 / 240); offV += (-w * w * off - 2 * w * offV) * hh; off += offV * hh; left -= hh; } }   // soft start, no overshoot
+          const target = ptr - off;
           tSm = ctx.reduced ? target : damp(tSm, target, 14, dt);
-          vSm = damp(vSm, dt > 0 ? (tSm - prev) / dt : 0, 30, dt);   // reel s per (clock) s
-          ctx.seek(tSm);
+          if (!armedSeek && Math.abs(pxOf(off)) < 3) armedSeek = true;
+          if (armedSeek) ctx.seek(tSm); else S.t = tSm;        // until then only the playhead moves
         } else if (mode === 'throw') {
-          thr.t += dt;
-          const k = Math.exp(-thr.w * thr.t), x = thr.land + (thr.C1 + thr.C2 * thr.t) * k;
-          tSm = x; ctx.seek(x);
-          if (Math.abs(x - thr.land) < .004 || thr.t > 3) { ctx.seek(thr.land); mode = 'idle'; thr = null; ctx.play(); }
+          if (Math.abs(S.off) < .5) {
+            S.off = S.offV = 0; mode = 'idle';
+            if (wasPlaying) { S.rate = 0; ramp = 0; ctx.play(); }
+          }
         }
+        if (ramp >= 0) { ramp += dt; const k = EASE.soft(Math.min(1, ramp / .4)); S.rate = k; ctx.vids.forEach(v => v.playbackRate = Math.max(.0625, k) * ctx.speed); if (ramp >= .4) { ramp = -1; S.rate = 1; ctx.vids.forEach(v => v.playbackRate = ctx.speed); } }
       });
     },
     async play(ctx) {
@@ -127,7 +138,7 @@ Pf.define({
       await p.to(190, 855, 1300, 'soft');            // onto IKEA
       await ctx.wait(250);
       p.down();
-      await p.to(205, 855, 260, 'arrive');           // the grab
+      await p.to(205, 855, 260, 'arrive');           // the grab: the playhead keeps its place and slides under the pointer
       await p.to(545, 856, 2600, 'inout');           // drag slowly through IKEA into Telekom: the reel shows each moment
       await ctx.wait(420);
       await p.to(612, 856, 200, k => k);             // a flick …
@@ -142,23 +153,27 @@ Pf.define({
      S2 · hover to preview
 
      Rest on a clip for about 300 ms and its film plays in the reel from the point under the pointer;
-     a ghost line marks that point while the playhead stays where it was (the reel keeps playing
-     underneath). Moving along the clip scrubs the preview; resting plays it. Leaving the timeline
-     lets the preview dissolve back to the playing clip. A click commits: the reel takes over from the
-     hovered point and the playhead glides there.
+     a ghost line marks that point and the clip is outlined, while the playhead stays where it was (the
+     reel keeps playing underneath). Moving along the clip re-cues the preview; resting lets it play on
+     its own clock. Leaving the timeline lets the preview dissolve back to the playing clip. A click (or
+     Enter on a focused clip) commits: the reel takes over from there and the playhead glides there.
      Timing at 1×:
-       ghost        a 1 px line at 40 % opacity, follows the pointer with λ = 25/s; fades in and out
+       ghost        a 1 px line at 60 % opacity, follows the pointer with λ = 25/s; fades in and out
                     with λ = 15/s (≈ 200 ms).
        intent       300 ms of rest (pointer moves < 1.5 px per frame) starts a preview.
-       preview      a second two-layer deck over the reel fades up over 420 ms (master curve) and settles
-                    from scale 1.03 → 1 over 1.0 s (expo-out); a cut to another film inside the preview
-                    crossfades in 320 ms. While the pointer moves the preview scrubs (one seek per frame);
-                    after 120 ms of rest it plays.
-       caption      names the previewed clip (the kit's caption: 260 ms out, 900 ms in, staggered);
-                    on leaving it returns to the playing clip.
-       leave        the deck dissolves over 600 ms (master curve), always from its current opacity.
+       preview      a second two-layer deck over the reel (under the scrims) fades up over 420 ms (master
+                    curve); the layer that becomes visible settles from scale 1.03 → 1 over 1.0 s
+                    (expo-out); a cut to another film inside the preview crossfades in 320 ms (incoming on
+                    top, only it fades).
+       clock        while resting the preview plays on by itself; it re-anchors only after the pointer
+                    has moved more than 1.5 px. Gliding fast (> 600 px/s) holds the current film; it cues
+                    again below 300 px/s, so films never flicker past.
+       caption      names the previewed clip; on leaving it returns to the playing clip.
+       leave        sideways: the deck dissolves over 600 ms (master curve) from its current opacity;
+                    out of the top or bottom: the preview freezes on its frame first, then dissolves.
        commit       click: the reel seeks to the hovered moment (420 ms crossfade under the deck), the
-                    playhead glides there over 0.9 s on the master curve, then the deck dissolves.
+                    playhead glides there with its velocity (kit spring, ω = 7/s), then the deck dissolves.
+                    Enter on a focused clip commits to the start of that clip.
      Scripted demo: a pointer dot rests on Telekom (preview), slides to Red Bull and the collection,
      then leaves; the reel is back on the clip that never stopped playing.
      Reduced motion: no scale settle; 250 ms crossfades; ghost follows 1:1; no autoplay.
@@ -166,14 +181,15 @@ Pf.define({
   S2: {
     title: 'hover to preview',
     does: 'rest on a clip · its film previews · leave returns',
-    why: 'Sampling without commitment: the reel never loses its place · a third and fourth video decoding at once, and the caption has to say which film you are looking at.',
+    why: 'Sampling without commitment: the reel never loses its place · two more videos decoding at once, and the caption has to say which film you are looking at.',
     setup(ctx) {
       const { root, S, PROJECTS, TOTAL } = ctx, tl = ctx.$('#tl'), track = ctx.track, reel = ctx.$('#reel');
       root.classList.add('s2');
       reel.insertAdjacentHTML('beforeend', '<div class="pv" aria-hidden="true"><video muted playsinline preload="auto"></video><video muted playsinline preload="auto"></video></div>');
       track.insertAdjacentHTML('beforeend', '<div class="ghost" aria-hidden="true"></div>');
       const pv = ctx.$('.pv'), dv = [...pv.querySelectorAll('video')], ghost = ctx.$('.ghost');
-      let blocked = false, px = -1, py = -1, lastPx = -1, over = false, gx = 0, ga = 0, rest = 0, still = 0, on = false, layer = 0, film = '', pending = null, pvClip = -1, pvA = 0, last = performance.now();
+      let blocked = false, px = -1, py = -1, lastPx = -1, over = false, gx = 0, ga = 0, rest = 0, on = false, layer = 0, film = '', pending = null, pvClip = -1,
+        anchorX = -1, speed = 0, holding = false, settleNext = false, last = performance.now();
       const rect = () => track.getBoundingClientRect();
       const tOf = x => { const r = rect(); return Math.max(0, Math.min(TOTAL - .05, (x - r.left) / r.width * TOTAL)); };
       const where = t => { const i = ctx.clipAt(t), p = PROJECTS[i], local = t - p.start, k = Pf.segAt(p, local), g = p.segs[k]; return { i, film: g.film, at: g.from + local - g.start }; };
@@ -182,72 +198,78 @@ Pf.define({
       ctx.listen(document.documentElement, 'pointerleave', () => { px = py = -1; });
       ctx.listen(window, 'blur', () => { px = py = -1; });
 
+      const settle = v => { if (settleNext && !ctx.reduced) { settleNext = false; ctx.anim(v, [{ transform: 'scale(1.03)' }, { transform: 'scale(1)' }], 1000, 'arrive'); } };
       function fadeDeck(to, d) {
         const from = +getComputedStyle(pv).opacity;
         pv.getAnimations().forEach(a => a.cancel());
         pv.style.opacity = from;
         const a = ctx.anim(pv, [{ opacity: from }, { opacity: to }], ctx.reduced ? 250 : d, 'soft');
         a.finished.then(() => { pv.style.opacity = to; a.cancel(); }).catch(() => {});
-        if (to === 1 && !ctx.reduced) ctx.anim(dv[layer], [{ transform: 'scale(1.03)' }, { transform: 'scale(1)' }], 1000, 'arrive');
       }
-      // cue the deck at reel-time t; same film → seek, other film → load on the hidden layer and crossfade
-      function cue(t, playIt) {
+      // cue the deck at reel-time t (an anchor): same film → seek; other film → load on the hidden layer, crossfade
+      function cue(t) {
         const w = where(t), v = dv[layer];
         if (w.film === film) {
-          if (v.readyState >= 1 && !v.seeking && Math.abs(v.currentTime - w.at) > (playIt ? .5 : .03)) { try { v.currentTime = w.at; } catch (_) {} }
-          if (playIt) { v.playbackRate = ctx.speed; v.play().catch(() => {}); } else v.pause();
+          if (v.readyState >= 1 && !v.seeking) { try { v.currentTime = w.at; } catch (_) {} }
+          v.playbackRate = ctx.speed; v.play().catch(() => {}); settle(v);
           return;
         }
         if (pending === w.film) return;
         pending = w.film; const inc = dv[1 - layer], out = v;
+        inc.getAnimations().forEach(a => a.cancel()); inc.classList.remove('top');
         inc.src = Pf.film(w.film); try { inc.currentTime = w.at; } catch (_) {}
         inc.playbackRate = ctx.speed; inc.play().catch(() => {});
         const go = () => {
           if (pending !== w.film) return; pending = null;
-          film = w.film; layer = 1 - layer; inc.classList.add('on'); out.classList.remove('on');
-          ctx.anim(inc, [{ opacity: 0 }, { opacity: 1 }], ctx.reduced ? 250 : 320, 'soft');
-          ctx.anim(out, [{ opacity: 1 }, { opacity: 0 }], ctx.reduced ? 250 : 320, 'soft', { delay: ctx.ms(80) }).finished.then(() => out.pause()).catch(() => {});
+          film = w.film; layer = 1 - layer; out.classList.remove('top'); inc.classList.add('on', 'top');
+          ctx.anim(inc, [{ opacity: 0 }, { opacity: 1 }], ctx.reduced ? 250 : 320, 'soft'); settle(inc);
+          ctx.after(ctx.reduced ? 260 : 340, () => { if (dv[layer] !== out) { out.getAnimations().forEach(a => a.cancel()); out.classList.remove('on'); out.pause(); } });
         };
-        if (inc.readyState >= 2) go(); else { inc.addEventListener('loadeddata', go, { once: true }); setTimeout(go, 900); }
+        if (inc.readyState >= 2 && !inc.seeking) go(); else { const f = () => { inc.removeEventListener('seeked', f); inc.removeEventListener('loadeddata', f); go(); }; inc.addEventListener('seeked', f); inc.addEventListener('loadeddata', f); ctx.after(900, go); }
       }
       function start(t) {
-        on = true; S.holdCap = true; cue(t, true); fadeDeck(1, 420);
-        pvClip = ctx.clipAt(t); ctx.caption(pvClip);
+        on = true; holding = false; settleNext = true; anchorX = px; S.holdCap = true; cue(t); fadeDeck(1, 420);
+        pvClip = ctx.clipAt(t); ctx.caption(pvClip); mark(pvClip);
       }
-      function end() {
-        on = false; fadeDeck(0, 600);
+      function end(freeze) {
+        on = false; if (freeze) dv.forEach(v => v.pause());
+        fadeDeck(0, 600); mark(-1);
         S.holdCap = false; if (+ctx.$('#cap').dataset.i !== S.cur) ctx.caption(S.cur);
-        setTimeout(() => { if (!on) dv.forEach(v => v.pause()); }, ctx.ms(700));
+        ctx.after(700, () => { if (!on) dv.forEach(v => v.pause()); });
       }
-      // commit: the reel takes over from the hovered moment
+      const mark = i => ctx.clips.forEach((c, k) => c.classList.toggle('pvh', k === i));
+      // commit: the reel takes over from the hovered moment (pointer), or from the clip's start (keyboard)
       ctx.listen(track, 'click', e => {
-        e.stopPropagation(); e.preventDefault();
-        const t = tOf(e.clientX), from = S.headX;
-        S.holdCap = true; ctx.seek(t, { fade: 420, settle: 1000 });
-        S.glide = { from, to: ctx.xOf(t), t0: performance.now(), d: ctx.reduced ? 1 : 900 };
-        if (!S.playing) ctx.play();
-        setTimeout(() => { if (on) { on = false; fadeDeck(0, 600); } S.holdCap = false; dv.forEach(v => v.pause()); }, ctx.ms(480));
+        e.stopPropagation(); e.preventDefault(); ctx.user();
+        const c = e.target.closest('.clip');
+        const t = e.detail === 0 && c ? PROJECTS[+c.dataset.i].start : tOf(e.clientX);
+        S.holdCap = true; ctx.seek(t, { fade: 420, settle: 1000, glide: true });
+        if (!S.playing && !ctx.reduced) ctx.play();
+        ctx.after(480, () => { if (on) { on = false; fadeDeck(0, 600); } mark(-1); S.holdCap = false; ctx.caption(S.cur); dv.forEach(v => v.pause()); });
         blocked = true;                               // no new preview until the pointer moves again
       }, true);
 
       ctx.on('tick', () => {
         const now = performance.now(), dt = Math.min(.064, (now - last) / 1000) * ctx.speed; last = now;
         const r = rect(), tr = tl.getBoundingClientRect();
-        over = px >= r.left - 2 && px <= r.right + 2 && py >= tr.top && py <= tr.bottom;
-        const moved = Math.abs(px - lastPx) > 1.5; lastPx = px;
+        const inX = px >= r.left - 2 && px <= r.right + 2, inY = py >= tr.top && py <= tr.bottom;
+        const wasOver = over; over = inX && inY;
+        const dx = lastPx < 0 ? 0 : Math.abs(px - lastPx), moved = dx > 1.5; lastPx = px;
+        speed = damp(speed, dt > 0 ? dx / (dt / ctx.speed) : 0, 20, dt);                // px per real second
         if (over) {
           const x = Math.max(0, Math.min(r.width, px - r.left));
           gx = ga < .02 || ctx.reduced ? x : damp(gx, x, 25, dt);
-          if (moved) { rest = 0; still = 0; blocked = false; } else { rest += dt; still += dt; }
-          const t = gx / r.width * TOTAL;
-          if (!on && !blocked && rest >= .3) start(t);
+          if (moved) { rest = 0; blocked = false; } else rest += dt;
+          if (!on && !blocked && rest >= .3) start(tOf(px));
           else if (on) {
-            cue(t, still >= .12);
-            const ci = ctx.clipAt(t); if (ci !== pvClip) { pvClip = ci; ctx.caption(ci); }
+            // the preview runs on its own clock; re-anchor only after real movement, and not while gliding fast
+            if (holding) { if (speed < 300) holding = false; } else if (speed > 600) holding = true;
+            if (!holding && Math.abs(px - anchorX) > 1.5 && (speed < 300 || !moved)) { anchorX = px; cue(tOf(px)); }
+            const ci = ctx.clipAt(tOf(px)); if (ci !== pvClip) { pvClip = ci; mark(ci); ctx.caption(ci); }
           }
-        } else { rest = 0; if (on) end(); }
+        } else { rest = 0; if (on) end(wasOver && inX && !inY); }      // left through the top or bottom: freeze first
         ga = damp(ga, over ? 1 : 0, ctx.reduced ? 40 : 15, dt);
-        ghost.style.transform = `translateX(${gx.toFixed(2)}px)`; ghost.style.opacity = (ga * .4).toFixed(3);
+        ghost.style.transform = `translateX(${gx.toFixed(2)}px)`; ghost.style.opacity = (ga * .6).toFixed(3);
       });
     },
     async play(ctx) {
