@@ -12,7 +12,7 @@
 .case .reel{transform-origin:0 0;will-change:transform,opacity}
 .case .reel::after{opacity:var(--grad,1)}
 .case .tl{background:none;will-change:transform}             /* the strip floats as it travels; a backdrop fades in once it lands */
-.case .ctls,.case .cap{will-change:transform,opacity}
+.case .ctls{will-change:transform,opacity}
 .cs-top{position:absolute;left:0;right:0;top:0;z-index:5;background:var(--stage);opacity:0;pointer-events:none}
 
 .cs-strip{position:absolute;left:36px;right:36px;top:50%;height:48px;margin-top:-24px;opacity:0;pointer-events:none}
@@ -39,7 +39,7 @@
 .tline.t1{height:34px;display:flex;align-items:flex-end}
 .tline.t1 img{display:block;width:auto}
 .tline.t1 .tag,.sl{font:600 11px/1 var(--sans);letter-spacing:.16em;text-transform:uppercase;color:var(--ink-2o)}
-h1.tline{margin:10px 0 0;font:400 44px/1 var(--serif);letter-spacing:-.015em}   /* the same metrics as the caption's title, so it can become it */
+h1.tline{margin:10px 0 0;font:400 44px/1 var(--serif);letter-spacing:-.015em}   
 .tline.t3{margin-top:12px;font-size:12px;color:var(--ink-2o)}
 .tline.t3 i{font-style:normal;color:var(--ink-2o);margin:0 8px}
 .sl span{color:var(--ink-2o);margin-right:10px}
@@ -76,7 +76,7 @@ const COPY = [
   ['The details that carry it.', 'The design as it shipped: the key screens and the motion between them.'],
   ['What changed afterwards.', 'The outcome in plain terms; numbers only where they are real.']
 ];
-const TLOGO = { ikea: 22, telekom: 32, redbull: 26 }, MLOGO = { ikea: 8, telekom: 13, redbull: 9 };
+const TLOGO = { ikea: 22, telekom: 32, redbull: 26, disneyplus: 40 }, MLOGO = { ikea: 8, telekom: 13, redbull: 9, disneyplus: 15 };
 const damp = (a, b, lam, dt) => b + (a - b) * Math.exp(-lam * dt);
 const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
 const lerp = (a, b, e) => a + (b - a) * e;
@@ -86,7 +86,7 @@ function makeCase(ctx) {
   const { root, S, PROJECTS, TOTAL, EASE } = ctx, N = PROJECTS.length;
   const soft = x => EASE.soft(clamp(x)), arrive = x => EASE.arrive(clamp(x));
   root.classList.add('case');
-  const tl = ctx.$('#tl'), reel = ctx.$('#reel'), track = ctx.track, chrome = ctx.$('.chrome'), cap = ctx.$('#cap'), ctls = ctx.$('#ctls');
+  const tl = ctx.$('#tl'), reel = ctx.$('#reel'), track = ctx.track, chrome = ctx.$('.chrome'), ctls = ctx.$('#ctls');
   const vw = innerWidth, vh = innerHeight, PAD = 36, tlH = vh * .1, reelH = vh * .9, W = track.clientWidth, TH = 48, FW = Math.round(TH * 16 / 9), K = 4, LINE = vh * .3;
   const nameOf = p => p.kind === 'work' ? p.co : p.name;
 
@@ -108,7 +108,7 @@ function makeCase(ctx) {
       }
       h += '<b></b></div>';
     }
-    h += p.kind === 'work' ? `<img class="cs-logo" src="media/logos-${p.logo}.svg" alt="" style="height:${Pf.LOGO[p.logo].h}px"><img class="cs-mini" src="media/logos-${p.logo}.svg" alt="" style="height:${MLOGO[p.logo]}px">` : '<span class="cs-logo"></span><span class="cs-mini"></span>';
+    h += p.logoShown ? `<img class="cs-logo" src="media/logos-${p.logo}.svg" alt="" style="height:${Pf.LOGO[p.logo].h}px"><img class="cs-mini" src="media/logos-${p.logo}.svg" alt="" style="height:${MLOGO[p.logo]}px">` : '<span class="cs-logo"></span><span class="cs-mini"></span>';
     SECS.forEach(n => h += `<span class="cs-lab">${n}</span>`);
   });
   h += '<div class="cs-ind"></div><div class="cs-head"></div><div class="cs-tip"></div></div><nav class="cs-nav" aria-label="case study sections and neighbouring work" inert></nav>';
@@ -224,6 +224,7 @@ function makeCase(ctx) {
   function buildNav() {
     let html = '';
     PROJECTS.forEach((p, c) => {
+      if (p.kind === 'card') return;                     // the title card is a clip, not a project: no case study
       if (c === tgt) for (let s = 0; s < 5; s++) { const [a, b] = secBox(B, sig, c, s); html += `<button type="button" data-s="${s}" style="left:${a}px;width:${b - a}px" aria-label="${SECS[s]}, section ${s + 1} of 5"></button>`; }
       else { const [a, b] = B[c]; html += `<button type="button" data-c="${c}" style="left:${a}px;width:${b - a}px" aria-label="${Pf.esc(nameOf(p))} · open case study"></button>`; }
     });
@@ -253,13 +254,13 @@ function makeCase(ctx) {
   let mode = 'home', tgt = 0, tr = null, last = performance.now(), fr = 0;
   const run = (d, fn, end) => { tr = { T: 0, d, fn, end }; fn(0); };
   function layers(inCS) {                                            // inert hidden layers, so focus never lands on what you cannot see
-    cs.inert = !inCS; nav.inert = !inCS; track.inert = inCS; cap.style.visibility = inCS ? 'hidden' : '';
+    cs.inert = !inCS; nav.inert = !inCS; track.inert = inCS;
     if (!inCS) root.removeAttribute('aria-label');
   }
   function enterCS() { mode = 'cs'; root.classList.add('in-cs'); veilKey = ''; buildNav(); layers(true); }
   function open(i, how) {
     if (mode !== 'home') return;
-    mode = 'opening'; tgt = i; S.holdCap = true; hideTip();
+    mode = 'opening'; tgt = i; hideTip();
     const p = PROJECTS[i]; if (S.cur !== i) ctx.jump(i); S.range = [p.start, p.start + p.len];
     if (!S.playing && !ctx.reduced) ctx.play();
     build(i); y = ty = 0; stw = null; cs.inert = false;
@@ -268,22 +269,14 @@ function makeCase(ctx) {
     if (ctx.reduced && how !== 'instant') how = 'fade';
     if (how === 'instant') {
       hero(1, 0); bar(1); ctlPos(1); csTop.style.opacity = 1; track.style.opacity = 0; strip.style.opacity = 1;
-      B = Bcs; sig[i] = 1; lab[i] = 1; logoA[i] = 0; render(); alpha = 1; rise = 0; page(); titles(9); cap.style.opacity = 0; sHead.style.opacity = 1;
+      B = Bcs; sig[i] = 1; lab[i] = 1; logoA[i] = 0; render(); alpha = 1; rise = 0; page(); titles(9); sHead.style.opacity = 1;
       enterCS(); return;
     }
-    // the caption's title line becomes the case study's h1 (same metrics: it only travels, then the title takes over)
-    const cr = cap.querySelector('.pr').getBoundingClientRect(), hr = ttl.querySelector('h1 span').getBoundingClientRect();
-    const mdx = hr.left - cr.left, mdy = hr.top - cr.top;
     const F = {
-      /* T1: the reel leads into the hero frame, the caption becomes the title, the timeline follows like a crane */
+      /* T1: the reel leads into the hero frame, the title rises under it, the timeline follows like a crane */
       hero: T => {
         hero(soft(T / 1.4), -y);
-        const m = soft((T - .1) / 1.4);
-        cap.style.transform = `translate(${(mdx * m).toFixed(2)}px,${(mdy * m).toFixed(2)}px)`;
-        const swap = T >= 1.5;
-        cap.style.opacity = swap ? 0 : 1;
-        cap.querySelector('.co').parentElement.style.opacity = (1 - soft((T - .1) / .5)).toFixed(3);
-        const ls = lines(); ls.forEach((sp, k) => { sp.style.transform = ''; sp.style.opacity = k === 0 ? soft((T - 1.1) / .5).toFixed(3) : swap ? 1 : 0; });
+        titles(T - .75);                                    // the logo, the title and the role rise from their masks, staggered
         ctlPos(soft((T - .1) / 1.4)); bar(soft((T - .2) / 1.4));
         track.style.opacity = 1 - soft((T - .25) / .5);
         B = Bcs; sig[i] = 1; logoA[i] = 0; lab[i] = arrive((T - .9) / .5); render();
@@ -302,7 +295,6 @@ function makeCase(ctx) {
         reel.style.opacity = T < .9 ? (1 - .75 * soft((T - .1) / .5)).toFixed(3) : (.25 + .75 * soft((T - 1.0) / .9)).toFixed(3);
         hero(he, -y);
         bar(soft((T - .7) / 1.3)); ctlPos(soft((T - .7) / 1.3)); csTop.style.opacity = soft((T - 1.7) / .4);
-        cap.style.opacity = 1 - soft(T / .35);
         alpha = soft((T - 1.0) / .8); rise = 80 * (1 - arrive((T - 1.0) / 1.2)); page(); titles(T - 1.1);
       },
       /* reduced motion: one crossfade, nothing travels */
@@ -311,10 +303,10 @@ function makeCase(ctx) {
         tl.style.opacity = sw ? soft((T - .2) / .2) : 1 - soft(T / .2); bar(sw ? 1 : 0); ctlPos(sw ? 1 : 0); ctls.style.opacity = tl.style.opacity;
         reel.style.opacity = tl.style.opacity; hero(sw ? 1 : 0, 0); csTop.style.opacity = sw ? 1 : 0;
         B = Bcs; sig[i] = 1; lab[i] = 1; logoA[i] = 0; render(); strip.style.opacity = 1; track.style.opacity = sw ? 0 : 1; sHead.style.opacity = 1;
-        cap.style.opacity = 1 - a; alpha = a; rise = 0; page(); titles(9);
+        alpha = a; rise = 0; page(); titles(9);
       }
     };
-    run({ hero: 1.8, zoom: 2.2, fade: .4 }[how], F[how], () => { if (how === 'hero') { cap.style.opacity = 0; } tl.style.opacity = ''; ctls.style.opacity = ''; reel.style.opacity = ''; enterCS(); });
+    run({ hero: 1.8, zoom: 2.2, fade: .4 }[how], F[how], () => { tl.style.opacity = ''; ctls.style.opacity = ''; reel.style.opacity = ''; enterCS(); });
   }
   /* C1: step to a neighbouring company: the strip re-forms around it, the hero crossfades, the page swaps.
      If the page is scrolled, it fades out, resets at alpha 0 and fades in at the top (no whip through the viewport). */
@@ -344,7 +336,7 @@ function makeCase(ctx) {
   function close() {
     if (mode !== 'cs') return;
     mode = 'closing'; root.classList.remove('in-cs'); hideTip(); nav.inert = true;
-    const y0 = y, far = y0 > 40, red = ctx.reduced; let capd = false; S.range = null;
+    const y0 = y, far = y0 > 40, red = ctx.reduced; S.range = null;
     run(red ? .4 : 1.6, T => {
       if (red) {
         const sw = T >= .2; y = ty = 0; alpha = 1 - soft(T / .2); page(); if (ttl) ttl.style.opacity = alpha;
@@ -358,13 +350,12 @@ function makeCase(ctx) {
         bar(1 - soft((T - .15) / 1.4)); ctlPos(1 - soft((T - .15) / 1.4));
         strip.style.opacity = 1 - soft((T - .4) / .5); track.style.opacity = soft((T - .6) / .6);
       }
-      if (!capd && T >= (red ? .2 : .8)) { capd = true; cap.style.transform = ''; cap.querySelector('.co').parentElement.style.opacity = ''; cap.style.opacity = 1; cap.style.visibility = ''; S.holdCap = false; delete cap.dataset.i; ctx.caption(S.cur); }
     }, () => { mode = 'home'; hero(0, 0); bar(0); ctlPos(0); tl.style.opacity = ''; reel.style.opacity = ''; ctls.style.opacity = ''; vis.forEach(o => o.v && o.v.pause()); layers(false); nav.innerHTML = ''; });
   }
   function scrollTo(yy) { yy = clamp(yy, 0, maxY); if (ctx.reduced) { y = ty = yy; return; } stw = { y0: y, y1: yy, T: 0, d: clamp(Math.abs(yy - y) / 1500, .8, 1.6) }; }
 
   /* ── input ── */
-  ctx.listen(track, 'click', e => { const c = e.target.closest('.clip'); if (!c || mode !== 'home') return; e.stopPropagation(); ctx.user(); open(+c.dataset.i, ctx.def.how); }, true);
+  ctx.listen(track, 'click', e => { const c = e.target.closest('.clip'); if (!c || mode !== 'home' || PROJECTS[+c.dataset.i].kind === 'card') return; e.stopPropagation(); ctx.user(); open(+c.dataset.i, ctx.def.how); }, true);
   ctx.listen(window, 'wheel', e => { if (mode !== 'cs') return; e.preventDefault(); stw = null; ty = clamp(ty + e.deltaY * (e.deltaMode === 1 ? 16 : 1), 0, maxY); }, { passive: false });
   ctx.listen(window, 'keydown', e => {
     if (mode === 'home') return;
@@ -417,7 +408,7 @@ function makeCase(ctx) {
     }
   });
   render();
-  return { open, close, step, scrollTo, get tops() { return tops; }, get mode() { return mode; }, get y() { return y; }, geo: { barTop, tlH, SW, G } };
+  return { open, close, step, scrollTo, boxCS, get tops() { return tops; }, get mode() { return mode; }, get y() { return y; }, geo: { barTop, tlH, SW, G } };
 }
 
 /* demo helpers: where things are on screen */
@@ -428,16 +419,15 @@ Pf.define({
   /* ──────────────────────────────────────────────────────────────────────────
      T1 · the reel becomes the hero
 
-     Click a logo (its label says "open case study"): the playing film never cuts. The reel itself settles
+     Click a clip (its label says "open case study"; the title card does not open): the playing film never cuts. The reel itself settles
      into the case study's hero frame (scale 0.86, its frame closing a little to the hero's proportions),
-     the caption's title travels and becomes the page's h1, the timeline rises like a camera crane and
+     the title (logo, project, role) rises under it from masks, the timeline rises like a camera crane and
      re-forms as that company's five sections, and the page continues below. If another clip was playing,
      its film crossfades in on the way. Name, contact, pause and sound stay on screen as a compact chrome.
      Timing at 1× (one timeline T, ≈ 1.8 s; every leg overlaps the last):
        0.00–1.40   hero: scale 1 → 0.86 in log space, translate into place, clip-path inset closes to the
                    hero frame (radius 0 → 6 px); master curve. It never takes the page's rise.
-       0.10–1.50   the caption's title line travels to the h1's place (same metrics, transform only) and
-                   hands over to it; its company line fades (0.10–0.60); the logo line fades in 1.10–1.60.
+       0.75–1.80   the title's three lines rise from their masks (105 % → 0, expo-out, 70 ms stagger).
        0.10–1.50   pause and sound travel up beside the contact links (master curve).
        0.20–1.60   timeline travels to the top as one container (translateY, master curve), floating
                    (no band of stage across the film); a backdrop fades in under it as it lands (1.2–1.6).
@@ -448,20 +438,20 @@ Pf.define({
                    ink bar marks the current section.
      Afterwards (as in C1): smooth scroll (λ = 9/s), sections and neighbours are real buttons, Esc or
      "back to the reel" closes with a forward move (1.6 s).
-     Scripted demo: a pointer dot clicks IKEA while it plays; then scrolls a little to show the page.
+     Scripted demo: a pointer dot clicks the first IKEA clip while it plays; then scrolls a little to show the page.
      Reduced motion: one 400 ms crossfade into the case study, nothing travels.
      ────────────────────────────────────────────────────────────────────────── */
   T1: {
     title: 'the reel becomes the hero',
     does: 'click a logo · the film settles into the hero',
-    why: 'No cut: what you were watching is what you open, and its caption becomes the title · the hero keeps the reel’s aspect, which limits art direction at the top of the case study.',
+    why: 'No cut: what you were watching is what you open, and the title rises under it · the hero keeps the reel’s aspect, which limits art direction at the top of the case study.',
     how: 'hero', opts: { clipAction: 'open case study' },
     setup(ctx) { ctx.cs = makeCase(ctx); },
     async play(ctx) {
       const p = ctx.pointer;
       await ctx.wait(1800);
       p.show(760, 420); await ctx.wait(450);
-      await p.to(clipX(ctx, 0), TRACK_Y(), 1300, 'soft');
+      await p.to(clipX(ctx, 1), TRACK_Y(), 1300, 'soft');
       await ctx.wait(350);
       p.down(); await ctx.wait(120); p.up();          // IKEA is playing: it settles into the hero without a cut
       await ctx.wait(2400);
@@ -505,7 +495,7 @@ Pf.define({
       const p = ctx.pointer;
       await ctx.wait(1800);
       p.show(760, 420); await ctx.wait(450);
-      await p.to(clipX(ctx, 1), TRACK_Y(), 1300, 'soft');
+      await p.to(clipX(ctx, 3), TRACK_Y(), 1300, 'soft');
       await ctx.wait(350);
       p.down(); await ctx.wait(120); p.up();
       await ctx.wait(700);
@@ -518,7 +508,7 @@ Pf.define({
   /* ──────────────────────────────────────────────────────────────────────────
      C1 · the timeline as section navigation
 
-     A case study (IKEA as the example) with the timeline at the top, under a compact chrome (name, role,
+     A case study (the first IKEA clip as the example) with the timeline at the top, under a compact chrome (name, role,
      contact, pause, sound): its clips are the sections (problem, research, concepts, design, outcome),
      drawn from the company's own film frames, desaturated so film colour never reads as selection; the
      playhead follows the scroll and a 2 px ink bar marks the current section; sections and neighbours are
@@ -539,7 +529,7 @@ Pf.define({
                     first section; the hero crossfades to the new films (1.0 s). If the page is scrolled,
                     page and hero fade out (350 ms), the scroll resets unseen, and both fade in at the top
                     (no whip); the copy rises 30 px (expo-out).
-     Scripted demo: scroll through problem and research, click "concepts", then step to Telekom.
+     Scripted demo: scroll through problem and research, click "concepts", then step to Disney+.
      Reduced motion: no smoothing, no reveals (250 ms fades), 400 ms crossfades for steps and close.
      ────────────────────────────────────────────────────────────────────────── */
   C1: {
@@ -547,7 +537,7 @@ Pf.define({
     does: 'sections on the timeline · playhead follows the scroll',
     why: 'One navigation for the whole site: you always see where you are in the story and in the career · the strip carries a lot (sections, neighbours, playhead) in 48 px, and labels need the width.',
     how: 'hero', opts: { clipAction: 'open case study' },
-    setup(ctx) { ctx.cs = makeCase(ctx); ctx.cs.open(0, 'instant'); },
+    setup(ctx) { ctx.cs = makeCase(ctx); ctx.cs.open(1, 'instant'); },
     async play(ctx) {
       const p = ctx.pointer, g = ctx.cs.geo;
       await ctx.wait(1400);
@@ -556,11 +546,11 @@ Pf.define({
       await ctx.wait(1400);
       for (let k = 0; k < 6; k++) { p.wheel(110); await ctx.wait(140); }    // into "research"
       await ctx.wait(1200);
-      const W = ctx.W, TW = W - 4 * (g.SW + g.G), sw = (TW - 12) / 5;        // IKEA's strip: sections, then four neighbours
-      await p.to(36 + 2 * (sw + 3) + sw / 2, BAR_Y(ctx), 1300, 'soft');     // "concepts"
+      const Bc = ctx.cs.boxCS(1), TL = Bc[1][0], sw = (Bc[1][1] - TL - 12) / 5;   // IKEA's strip: the title card, the sections, then six neighbours
+      await p.to(36 + TL + 2 * (sw + 3) + sw / 2, BAR_Y(ctx), 1300, 'soft');     // "concepts"
       await ctx.wait(300); p.down(); await ctx.wait(110); p.up();
       await ctx.wait(2200);
-      await p.to(36 + TW + g.G + g.SW / 2, BAR_Y(ctx), 1100, 'soft');       // the thin Telekom clip
+      await p.to(36 + (Bc[2][0] + Bc[2][1]) / 2, BAR_Y(ctx), 1100, 'soft');       // the thin Disney+ clip
       await ctx.wait(700); p.down(); await ctx.wait(110); p.up();
       await ctx.wait(1000);
       await p.to(820, 560, 1300, 'soft');

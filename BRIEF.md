@@ -2,7 +2,7 @@
 
 **Date:** 2026-11-24 · **Owner:** Johannes · **Built by:** Claude with the `design-explorations` method, **light mode** (one builder, one review by both lenses)
 **Idea and decisions:** `docs/IDEA.md` (the grill). This brief turns them into a round of explorations.
-**Output:** the repo root: `board.html` (desktop frames), one page per cluster with `?screen=ID`, `kit/`, `media/` (stand-in films), `research/`.
+**Output:** the repo root: `board.html` (desktop frames), one page per cluster with `?screen=ID`, `kit/`, `media/` (the real reel, encoded; strip and logos), `research/`.
 **Ships to:** this repository (`medicalhelp/timeline-reel`, moved from the collection repo on 2026-11-25); Johannes reviews the board first.
 
 ## 1. The problem
@@ -15,15 +15,15 @@ A product design portfolio has to make sense to a hiring manager in about 30 sec
 - **Audience:** hiring managers; clear in 30 seconds.
 - **Reel:** a 5–15 s film per project, autoplay; dragging the playhead or clicking a clip takes over. Muted, one sound toggle.
 - **Timeline:** ordered by time; at the bottom on Home, at the top in a case study, where its clips are the case study's sections and the playhead follows the scroll. About 20 clips. Work clips show the company logo in white; personal projects are quieter, with a tag. Minimal: clips and a playhead that is a single thin line; no ruler, no timecode, no handle (decided after H1).
-- **First screen also:** name and role; a caption for the current clip (company, project, role, year); contact and CV.
+- **First screen also:** the name (small, no role); contact and CV. No caption (round 1 update, see `docs/IDEA.md` 23–31).
 - **Opening a case study, explore both:** the reel becomes the case study's hero, or the timeline zooms into the clip and opens it into sections.
 - **Desktop first** (1440 × 900 frame); mobile later.
 - **Look:** dark, cinematic, quiet type; a near-black stage so the films glow; white logos; small precise type.
-- **Stand-in films:** recordings of real work (the archive intro, the collection, the assistant explorations, the recipe page). Company names and logos are **placeholders** until the real project list exists.
+- **The film:** the real Reel 2025 (`media/reel.mp4`), one continuous film; clips are stretches of it, in its own order. Roles, years and project titles are **placeholders**.
 
 ## 4. Motion bar: butter-smooth
 Measured against the intro in `medicalhelp/the-archive` (feel, not copy) and Aristide Benoist's work (`research/smooth-motion.md`).
-1. **One master clock.** Everything (reel, playhead, caption, timeline) is driven from one timeline in a single `requestAnimationFrame` loop, never from scattered timers.
+1. **One master clock.** Everything (reel, playhead, timeline, sound fade) is driven from one timeline in a single `requestAnimationFrame` loop, never from scattered timers.
 2. **Long, soft curves.** Big moves use soft-start, soft-landing curves (the archive's `cubic-bezier(.601,0,.405,1)`, or an expo-out `cubic-bezier(.16,1,.3,1)` for arrivals), 0.8–1.6 s. Small moves 240–400 ms. Nothing linear except the playhead while playing (that is real time).
 3. **Smoothed input.** Pointer-driven things (scrub, hover, scroll-linked playhead) follow a smoothed target (lerp ≈ 0.12–0.2 per frame at 60 fps, time-corrected), so motion never jitters or snaps.
 4. **The camera moves, not the pieces.** Prefer moving one container (scale/translate) over many elements; scale in log space.
@@ -51,8 +51,8 @@ _Updated after H1 feedback: five clips (IKEA, Telekom, Red Bull, then the recipe
 **C · Case study** (`case.html`)
 - **C1 · the timeline as section navigation**: a case study page (IKEA as the example) with the timeline at the top: its clips are the sections (problem, research, concepts, design, outcome); the playhead follows the scroll; clicking a section scrolls there smoothly; the neighbouring companies sit as thin clips at both ends to step to.
 
-**K · Caption** (`caption.html`)
-- **K1 · the caption as a lower third**: the company's white logo replaces its name in the caption; project and role sit under it; on each clip change every line leaves and arrives on its own beat, and inside a clip the second line names the film being shown.
+**K · Change** (`caption.html`)
+- **K1 · a project change, by the timeline alone**: with no caption, the entering clip's brand bar swells, a band of its colour washes along the clip and a ring leaves the playhead; the film is never touched.
 
 **I · Arrival** (`arrive.html`)
 - **I1 · first load**: the name settles in, the timeline's clips draw in from left to right with their logos, the first film fades up and the playhead starts moving: one continuous gesture in the archive's spirit.

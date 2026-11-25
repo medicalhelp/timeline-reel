@@ -12,11 +12,11 @@
 .h2 .clip.on{box-shadow:inset 0 0 0 1px rgba(244,242,238,.32)}
 .h2 .clip.personal{box-shadow:inset 0 0 0 1px var(--edge)}   /* the unnamed clips keep a faint presence at rest */
 .h2 .clip:focus-visible{box-shadow:inset 0 0 0 2px var(--ink)}
-/* H3 · the timeline breathes: one variable, --g (0 → 1), drives the reel, the timeline and the caption;
+/* H3 · the timeline breathes: one variable, --g (0 → 1), drives the reel and the timeline;
    --b drives the frames' brightness (in reduced motion only --b moves) */
 .h3{--g:0;--b:0}
 .h3 .reel{transform:translateY(calc(var(--g) * -27px));clip-path:inset(calc(var(--g) * 27px) 0 calc(var(--g) * 27px) 0)}
-.h3 .cap,.h3 .ctls{transform:translateY(calc(var(--g) * -54px))}
+.h3 .ctls{transform:translateY(calc(var(--g) * -54px))}
 .h3 .tl{height:144px;background:none}
 .h3 .tl::before{content:"";position:absolute;inset:0;background:var(--stage);transform:translateY(calc((1 - var(--g)) * 54px))}
 .h3 .tl-track{height:84px;transform:translateY(calc((1 - var(--g)) * 27px))}
@@ -36,23 +36,23 @@
 /* ──────────────────────────────────────────────────────────────────────────
    H1 · the reel and the timeline  (the reference)
 
-   Live: the reel autoplays through the five clips (IKEA, Telekom, Red Bull, then two personal
-   projects; ≈ 2 min), each clip a sequence of films; the playhead runs in real time; the
-   caption changes per clip, not per cut. The timeline shows frames from the films, dimmed,
-   with the company logos in white on top; personal clips have no label (hover names them). Click a clip (or ← →, space) to take over.
+   Live: the real reel (Reel 2025, 79 s, one continuous film) autoplays; its title card (inverted: white on
+   black) is the first clip, then IKEA, Disney+, Telekom, Red Bull, one unnamed personal clip, Telekom, IKEA, Telekom
+   in the reel's own order. The playhead is the film's own time. Each brand's logo (white) sits on its first
+   clip only; its later clips carry a faint underline in the brand colour, and every brand clip takes
+   its colour on hover. There is no caption and no text on the timeline (hover names a clip). Click a clip
+   (or ← →, space) to take over.
    Timing at 1×:
-     cut          the next film is already playing on the hidden layer; it fades up over
-                  1.0 s on the master curve (.601,0,.405,1) while settling from scale
-                  1.045 → 1 over 1.6 s (expo-out); the old layer fades 160 ms later.
-     caption      each line slides up and out (260 ms, expo-in, 30 ms stagger), then the
-                  new lines rise in from below their mask (900 ms, expo-out, 70 ms stagger).
+     clip change  none to see: the film simply plays on (a click crossfades the film to the clip's start:
+                  1.0 s on the master curve (.601,0,.405,1) while it settles from scale 1.045 → 1 over 1.6 s).
      playhead     a single 1 px line, no timecode or handle; linear while playing (it is real
                   time); on a click it glides to the clip
                   over 1.1 s on the master curve, chasing the clock so it never stops.
-     clips        background and logo brighten on hover and for the current clip (260 ms).
-   Scripted demo (board "replay"): plays 4 s, then clicks Telekom, Red Bull and the collection.
-   After one pass the reel holds on its last frame, paused, until the viewer acts; a pause toggle sits
-   beside the sound toggle (space toggles too, unless a control has focus).
+     clips        background brightens on hover and for the current clip (260 ms); the brand underline
+                  thickens and lights (320 ms).
+     controls     pause and sound are 40 px round icon buttons on a black blur; sound fades in or out over ≈ 0.4 s.
+   Scripted demo (board "replay"): plays 4 s, then clicks Telekom, Red Bull and the personal clip.
+   After one pass the reel holds on its last frame, paused, until the viewer acts (space toggles too, unless a control has focus).
    Reduced motion: no autoplay (films stay still), crossfades only, no glide.
    ────────────────────────────────────────────────────────────────────────── */
 Pf.define({
@@ -62,14 +62,14 @@ Pf.define({
     why: 'Shows the work moving within a second, and the career at a glance underneath · the films carry it, so weak footage shows.',
     async play(ctx) {
       await ctx.wait(4200);
-      for (const i of [1, 2, 4]) { ctx.jump(i); await ctx.wait(3600); }
+      for (const i of [3, 4, 5]) { ctx.jump(i); await ctx.wait(3600); }
     }
   },
 
   /* ────────────────────────────────────────────────────────────────────────
      H2 · frames on approach
 
-     At rest the timeline is only the white logos on black (and the playhead): the work above has
+     At rest the timeline is only the white logos and the brand underlines on black (and the playhead): the work above has
      the stage to itself. As the pointer comes down towards the timeline the frame strips fade up
      underneath the logos; moving away lets them sink back.
      Timing at 1×:
@@ -80,7 +80,7 @@ Pf.define({
                     One custom property (--near) on the timeline drives all five strips.
        logos, playhead, hover label and clicks as in H1.
      Scripted demo: a pointer dot drifts down from the reel (the frames rise as it nears), rests on
-     Telekom, glides to Red Bull and the collection, then leaves upwards; the frames sink back.
+     Telekom, glides to Red Bull and the personal clip, then leaves upwards; the frames sink back.
      Reduced motion: nearness is on/off (within 140 px) with a ≈ 250 ms opacity fade; no autoplay.
      ──────────────────────────────────────────────────────────────────────── */
   H2: {
@@ -109,11 +109,11 @@ Pf.define({
       await ctx.wait(1400);
       p.show(880, 330); await ctx.wait(500);
       await p.to(640, 690, 1700, 'soft');          // the frames start rising around y ≈ 570
-      await p.to(500, 852, 1000, 'soft');          // onto Telekom
+      await p.to(ctx.clipX(3), 852, 1000, 'soft');          // onto Telekom
       await ctx.wait(1200);
-      await p.to(820, 856, 1300, 'soft', -10);     // Red Bull
+      await p.to(ctx.clipX(4), 856, 1300, 'soft', -10);     // Red Bull
       await ctx.wait(900);
-      await p.to(1200, 854, 1100, 'soft', -8);     // the collection (unnamed; hover names it)
+      await p.to(ctx.clipX(5), 854, 1100, 'soft', -8);     // the personal clip (unnamed; hover names it)
       await ctx.wait(1000);
       await p.to(980, 300, 1700, 'soft');          // leave: the frames sink back
       p.hide();
@@ -136,11 +136,11 @@ Pf.define({
          timeline   its stage panel rises 54 px; the track lifts 27 px; each clip's clip-path opens
                     from a centred 48 px slit to the full 84 px frame; the playhead line scales to fit.
          frames     a black veil over the strips thins (brightness ≈ .30 → .52).
-         caption    rises 54 px with the reel's edge.
+         controls   the pause and sound buttons rise 54 px with the reel's edge.
        intent       enter at the timeline's edge; leave 6 px above its current edge, after 180 ms.
                     Keyboard focus inside the timeline grows it too; clips show an inset focus ring.
      Scripted demo: a pointer dot comes down onto the timeline (it grows), glides across Red Bull
-     to the collection, then leaves upwards (it breathes back).
+     to the personal clip, then leaves upwards (it breathes back).
      Reduced motion: no geometry; only the frames brighten (≈ 250 ms fade); no autoplay.
      ──────────────────────────────────────────────────────────────────────── */
   H3: {
@@ -175,11 +175,11 @@ Pf.define({
       const p = ctx.pointer;
       await ctx.wait(1400);
       p.show(760, 380); await ctx.wait(500);
-      await p.to(560, 852, 1500, 'soft');          // onto the timeline: it grows
+      await p.to(ctx.clipX(3), 852, 1500, 'soft');          // onto the timeline: it grows
       await ctx.wait(1300);
-      await p.to(820, 832, 1500, 'soft', -12);     // across Red Bull
+      await p.to(ctx.clipX(4), 832, 1500, 'soft', -12);     // across Red Bull
       await ctx.wait(1000);
-      await p.to(1190, 830, 1000, 'soft', -8);     // the collection
+      await p.to(ctx.clipX(5), 830, 1000, 'soft', -8);     // the personal clip
       await ctx.wait(1000);
       await p.to(900, 360, 1500, 'soft');          // leave: it breathes back
       p.hide();

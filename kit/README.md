@@ -27,7 +27,7 @@ Pf.define({
 | | |
 |---|---|
 | `ctx.S` | State: `t` (seconds in the reel), `playing`, `cur` (clip index), `headX` (playhead px), `glide`. |
-| `ctx.jump(i)` | Go to clip `i`: the playhead glides on the master curve, the reel crossfades, the caption changes. |
+| `ctx.jump(i)` | Go to clip `i`: the playhead glides on the master curve, the reel crossfades to the clip's start. (The film is continuous: playing into the next clip is not a cut.) |
 | `ctx.play()`, `ctx.pause()` | The clock. |
 | `ctx.on('frame' / 'clip' / 'play' / 'pause', fn)` | Hooks. `frame` runs every rAF with the state. |
 | `ctx.anim(el, keyframes, ms, ease)` | `element.animate` at the board's speed; `ease`: `'soft'` (the archive's master curve), `'arrive'` (expo-out), `'leave'` (expo-in), `'inout'`, or any CSS easing. |
@@ -35,7 +35,7 @@ Pf.define({
 | `ctx.wait(ms)` | Pause in a demo; aborts cleanly on replay. |
 | `ctx.xOf(t)`, `ctx.clipAt(t)`, `ctx.W` | Timeline geometry. |
 | `ctx.$`, `ctx.$$`, `ctx.root`, `ctx.track`, `ctx.head`, `ctx.clips`, `ctx.vids` | The DOM. |
-| `ctx.PROJECTS`, `ctx.TOTAL` | The 20 placeholder projects (`co`, `lg`, `pr`, `role`, `yr`, `kind`, `film`, `from`, `len`, `start`). |
+| `ctx.PROJECTS`, `ctx.TOTAL` | The 8 clips in reel order (`kind` card/work/personal, `brand`, `co`, `logo`, `logoShown`, `rep`, `color`, `pr`, `start`, `len`, `segs` = the reel's own shots). `ctx.clipX(i)` = a clip's centre in viewport px, for demos. |
 | `ctx.reduced` | Reduced motion: crossfades only, no camera moves, no autoplay. |
 
 ## Rules

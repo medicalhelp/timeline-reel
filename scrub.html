@@ -52,14 +52,14 @@ Pf.define({
                     (ω ≥ 6/s, raised so it never overshoots or turns back); it ends within 0.5 px.
        resume       the clock eases from rate 0 to 1 over 400 ms (master curve), if it was playing.
      Scripted demo: a pointer dot grabs IKEA, drags slowly into Telekom, then flicks; the throw
-     carries on and settles on Red Bull's first frame, which plays.
+     carries on and settles on a clip start, which plays.
      Reduced motion: 1:1 follow, no inertia; on release it jumps to a nearby clip start or stays;
      no autoplay.
      ────────────────────────────────────────────────────────────────────────── */
   S1: {
     title: 'drag to scrub',
     does: 'drag the playhead · inertia · settles on a clip',
-    why: 'Feels like an editor and lets you sample the whole reel in one gesture · every frame of the drag is a seek, so the films need dense keyframes (now every 8 frames).',
+    why: 'Feels like an editor and lets you sample the whole reel in one gesture · every frame of the drag is a seek, so the reel needs dense keyframes (now every 16 frames at 60 fps).',
     setup(ctx) {
       const { root, S, PROJECTS, TOTAL, EASE } = ctx, tl = ctx.$('#tl'), track = ctx.track;
       root.classList.add('s1');
@@ -135,14 +135,14 @@ Pf.define({
       const p = ctx.pointer;
       await ctx.wait(1600);
       p.show(760, 420); await ctx.wait(450);
-      await p.to(190, 855, 1300, 'soft');            // onto IKEA
+      await p.to(ctx.clipX(1) + 20, 855, 1300, 'soft');            // onto IKEA
       await ctx.wait(250);
       p.down();
-      await p.to(205, 855, 260, 'arrive');           // the grab: the playhead keeps its place and slides under the pointer
-      await p.to(545, 856, 2600, 'inout');           // drag slowly through IKEA into Telekom: the reel shows each moment
+      await p.to(ctx.clipX(1) + 35, 855, 260, 'arrive');           // the grab: the playhead keeps its place and slides under the pointer
+      await p.to(ctx.clipX(3) - 40, 856, 2600, 'inout');           // drag slowly through IKEA into Telekom: the reel shows each moment
       await ctx.wait(420);
-      await p.to(612, 856, 200, k => k);             // a flick …
-      p.up(false);                                   // … and let go: inertia carries it, it settles on Red Bull
+      await p.to(ctx.clipX(3) + 150, 856, 200, k => k);             // a flick …
+      p.up(false);                                   // … and let go: inertia carries it, it settles on a clip
       await ctx.wait(900);
       await p.to(980, 420, 1500, 'soft');
       p.hide();
@@ -168,20 +168,20 @@ Pf.define({
        clock        while resting the preview plays on by itself; it re-anchors only after the pointer
                     has moved more than 1.5 px. Gliding fast (> 600 px/s) holds the current film; it cues
                     again below 300 px/s, so films never flicker past.
-       caption      names the previewed clip; on leaving it returns to the playing clip.
+       clip mark    the previewed clip is outlined on the timeline; on leaving, the playing clip is current again.
        leave        sideways: the deck dissolves over 600 ms (master curve) from its current opacity;
                     out of the top or bottom: the preview freezes on its frame first, then dissolves.
        commit       click: the reel seeks to the hovered moment (420 ms crossfade under the deck), the
                     playhead glides there with its velocity (kit spring, ω = 7/s), then the deck dissolves.
                     Enter on a focused clip commits to the start of that clip.
-     Scripted demo: a pointer dot rests on Telekom (preview), slides to Red Bull and the collection,
+     Scripted demo: a pointer dot rests on Telekom (preview), slides to Red Bull and the personal clip,
      then leaves; the reel is back on the clip that never stopped playing.
      Reduced motion: no scale settle; 250 ms crossfades; ghost follows 1:1; no autoplay.
      ────────────────────────────────────────────────────────────────────────── */
   S2: {
     title: 'hover to preview',
     does: 'rest on a clip · its film previews · leave returns',
-    why: 'Sampling without commitment: the reel never loses its place · two more videos decoding at once, and the caption has to say which film you are looking at.',
+    why: 'Sampling without commitment: the reel never loses its place · two more videos decoding at once, and nothing but the outlined clip says which part of the reel you are previewing.',
     setup(ctx) {
       const { root, S, PROJECTS, TOTAL } = ctx, tl = ctx.$('#tl'), track = ctx.track, reel = ctx.$('#reel');
       root.classList.add('s2');
@@ -228,13 +228,12 @@ Pf.define({
         if (inc.readyState >= 2 && !inc.seeking) go(); else { const f = () => { inc.removeEventListener('seeked', f); inc.removeEventListener('loadeddata', f); go(); }; inc.addEventListener('seeked', f); inc.addEventListener('loadeddata', f); ctx.after(900, go); }
       }
       function start(t) {
-        on = true; holding = false; settleNext = true; anchorX = px; S.holdCap = true; cue(t); fadeDeck(1, 420);
-        pvClip = ctx.clipAt(t); ctx.caption(pvClip); mark(pvClip);
+        on = true; holding = false; settleNext = true; anchorX = px; cue(t); fadeDeck(1, 420);
+        pvClip = ctx.clipAt(t); mark(pvClip);
       }
       function end(freeze) {
         on = false; if (freeze) dv.forEach(v => v.pause());
         fadeDeck(0, 600); mark(-1);
-        S.holdCap = false; if (+ctx.$('#cap').dataset.i !== S.cur) ctx.caption(S.cur);
         ctx.after(700, () => { if (!on) dv.forEach(v => v.pause()); });
       }
       const mark = i => ctx.clips.forEach((c, k) => c.classList.toggle('pvh', k === i));
@@ -243,9 +242,9 @@ Pf.define({
         e.stopPropagation(); e.preventDefault(); ctx.user();
         const c = e.target.closest('.clip');
         const t = e.detail === 0 && c ? PROJECTS[+c.dataset.i].start : tOf(e.clientX);
-        S.holdCap = true; ctx.seek(t, { fade: 420, settle: 1000, glide: true });
+        ctx.seek(t, { fade: 420, settle: 1000, glide: true });
         if (!S.playing && !ctx.reduced) ctx.play();
-        ctx.after(480, () => { if (on) { on = false; fadeDeck(0, 600); } mark(-1); S.holdCap = false; ctx.caption(S.cur); dv.forEach(v => v.pause()); });
+        ctx.after(480, () => { if (on) { on = false; fadeDeck(0, 600); } mark(-1); dv.forEach(v => v.pause()); });
         blocked = true;                               // no new preview until the pointer moves again
       }, true);
 
@@ -265,7 +264,7 @@ Pf.define({
             // the preview runs on its own clock; re-anchor only after real movement, and not while gliding fast
             if (holding) { if (speed < 300) holding = false; } else if (speed > 600) holding = true;
             if (!holding && Math.abs(px - anchorX) > 1.5 && (speed < 300 || !moved)) { anchorX = px; cue(tOf(px)); }
-            const ci = ctx.clipAt(tOf(px)); if (ci !== pvClip) { pvClip = ci; mark(ci); ctx.caption(ci); }
+            const ci = ctx.clipAt(tOf(px)); if (ci !== pvClip) { pvClip = ci; mark(ci); }
           }
         } else { rest = 0; if (on) end(wasOver && inX && !inY); }      // left through the top or bottom: freeze first
         ga = damp(ga, over ? 1 : 0, ctx.reduced ? 40 : 15, dt);
@@ -276,11 +275,11 @@ Pf.define({
       const p = ctx.pointer;
       await ctx.wait(1600);
       p.show(780, 400); await ctx.wait(450);
-      await p.to(470, 856, 1400, 'soft');            // rest on Telekom: after 300 ms its film previews
+      await p.to(ctx.clipX(3), 856, 1400, 'soft');            // rest on Telekom: after 300 ms its film previews
       await ctx.wait(2200);
-      await p.to(800, 853, 1200, 'soft', -10);       // slide to Red Bull: the preview follows
+      await p.to(ctx.clipX(4), 853, 1200, 'soft', -10);       // slide to Red Bull: the preview follows
       await ctx.wait(2000);
-      await p.to(1230, 856, 1100, 'soft', -10);      // the collection
+      await p.to(ctx.clipX(5), 856, 1100, 'soft', -10);      // the personal clip
       await ctx.wait(2000);
       await p.to(1000, 380, 1500, 'soft');           // leave: back to the clip that kept playing
       p.hide();
