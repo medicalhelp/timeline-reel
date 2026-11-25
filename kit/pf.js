@@ -275,5 +275,5 @@
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
     window.addEventListener('message', e => { const d = e.data || {}; if (d.pf === 'play') run(d.speed || 1); if (d.pf === 'reset') { SPEED = 1; build(); } });
   }
-  window.Pf = { define, PROJECTS, TOTAL, FILMS, segAt, LOGO, EASE, CSS, bezier, tc, esc, film, list: () => Object.entries(DEFS).map(([id, d]) => ({ id, title: d.title, does: d.does, why: d.why })) };
+  window.Pf = { define, PROJECTS, TOTAL, FILMS, FDUR, SPF, segAt, LOGO, EASE, CSS, bezier, tc, esc, film, list: () => Object.entries(DEFS).map(([id, d]) => ({ id, title: d.title, does: d.does, why: d.why })) };
 })();

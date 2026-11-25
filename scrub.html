@@ -8,6 +8,7 @@
 <style>
 /* S1 · drag to scrub */
 .s1 .tl{cursor:grab}
+.s1 .tl img{-webkit-user-drag:none;user-drag:none}   /* a native image drag would cancel the pointer */
 .s1.grabbing,.s1.grabbing *{cursor:grabbing !important}
 .s1.grabbing .clip .strip{filter:brightness(.5) saturate(.95)}
 .s1.grabbing .tip{opacity:0 !important}
@@ -63,6 +64,7 @@ Pf.define({
 
       ctx.listen(tl, 'pointerdown', e => {
         if (e.button > 0) return;
+        e.preventDefault();                           // no native drag or selection (it fires pointercancel)
         mode = 'armed'; x0 = e.clientX; samples = [{ x: e.clientX, t: performance.now() }];
         try { tl.setPointerCapture(e.pointerId); } catch (_) {}
       });
